@@ -209,6 +209,63 @@ export const STRINGS = {
   },
   'camp.incompleteFlag': { hi: 'साक्षात्कार अधूरा', en: 'Interview incomplete' },
 
+  // --- Referral tracker ---
+  'ref.title': { hi: 'रेफरल ट्रैकर', en: 'Referral tracker' },
+  'ref.subtitle': {
+    hi: 'राज सिलिकोसिस पोर्टल के चरणों के अनुसार',
+    en: 'Mapped to the Raj Silicosis portal stages',
+  },
+  'ref.total': { hi: 'कुल रेफरल', en: 'Total referrals' },
+  'ref.inProgress': { hi: 'प्रक्रिया में', en: 'In progress' },
+  'ref.certified': { hi: 'प्रमाणित', en: 'Certified' },
+  'ref.stalled': { hi: '14 दिन से अटके', en: 'Stalled >14 days' },
+  'ref.funnel': { hi: 'चरणवार गिरावट', en: 'Stage-by-stage drop-off' },
+  'ref.reached': { hi: 'यहाँ तक पहुँचे', en: 'reached' },
+  'ref.lostHere': { hi: 'यहाँ से आगे नहीं बढ़े', en: 'did not go further' },
+  'ref.awaitingPayment': { hi: 'प्रमाणित, भुगतान बाकी', en: 'certified, awaiting payment' },
+  'ref.awaitingPaymentNote': {
+    hi: 'ये श्रमिक मिल चुके हैं — यह पहचान की नहीं, भुगतान की देरी है। इसे गिरावट में नहीं गिना जाता।',
+    en: 'These workers were found. This is a payment delay, not a detection failure, and is not counted as drop-off.',
+  },
+  'ref.medianDays': { hi: 'औसत दिन', en: 'median days' },
+  'ref.currentlyHere': { hi: 'अभी यहाँ', en: 'here now' },
+  'ref.biggestLoss': { hi: 'सबसे बड़ी गिरावट', en: 'Largest single drop-off' },
+  'ref.outcomes': { hi: 'बाहर निकलने के कारण', en: 'Exits from the pipeline' },
+  'ref.lostFrom': { hi: 'किस चरण से', en: 'lost from' },
+  'ref.stalledList': { hi: 'अटके हुए रेफरल', en: 'Stalled referrals' },
+  'ref.stalledNone': { hi: 'कोई रेफरल अटका नहीं है।', en: 'No referrals are stalled.' },
+  'ref.stalledWhy': {
+    hi: 'ये रेफरल एक ही चरण में 14 दिन से अधिक रुके हैं। समाप्त हो चुके रेफरल यहाँ नहीं दिखते।',
+    en: 'These have sat in one stage for more than 14 days. Finished referrals are not listed.',
+  },
+  'ref.days': { hi: 'दिन', en: 'days' },
+  'ref.stage': { hi: 'चरण', en: 'Stage' },
+  'ref.worker': { hi: 'श्रमिक', en: 'Worker' },
+  'ref.board': { hi: 'बोर्ड', en: 'Board' },
+  'ref.noSymptomsNote': {
+    hi: 'लक्षण न होने पर अस्वीकृति राज्य की सबसे बड़ी हानि है — 21,871 आवेदनों में से 11,288 (57.6%)। शुरुआती सिलिकोसिस में लक्षण होते ही नहीं।',
+    en: 'Rejection for absent symptoms is the state\'s largest loss — 11,288 of 21,871 applications (57.6%). Early silicosis has no symptoms at all.',
+  },
+
+  // --- Pipeline stage names ---
+  'stage.REGISTERED': { hi: 'पंजीकृत', en: 'Registered' },
+  'stage.PRIMARY_CHECKUP': { hi: 'प्राथमिक जाँच', en: 'Primary checkup' },
+  'stage.RADIOGRAPHER': { hi: 'रेडियोग्राफर', en: 'Radiographer' },
+  'stage.RADIOLOGIST': { hi: 'रेडियोलॉजिस्ट', en: 'Radiologist' },
+  'stage.MO_APPROVAL': { hi: 'चिकित्सा अधिकारी स्वीकृति', en: 'MO approval' },
+  'stage.BOARD': { hi: 'बोर्ड', en: 'Board' },
+  'stage.CERTIFIED': { hi: 'प्रमाणित', en: 'Certified' },
+  'stage.DISBURSED': { hi: 'भुगतान', en: 'Disbursed' },
+  'stage.REJECTED_NO_SYMPTOMS': {
+    hi: 'अस्वीकृत — कोई लक्षण नहीं',
+    en: 'Rejected — no symptoms',
+  },
+  'stage.REJECTED_POST_XRAY': {
+    hi: 'अस्वीकृत — एक्स-रे के बाद',
+    en: 'Rejected — after X-ray',
+  },
+  'stage.LOST_TO_FOLLOWUP': { hi: 'संपर्क टूट गया', en: 'Lost to follow-up' },
+
   // --- Escalation reasons ---
   'esc.PRIOR_TB': { hi: 'पहले टीबी हुई थी', en: 'Prior TB' },
   'esc.LATENCY': {

@@ -32,6 +32,7 @@ import {
   isCampEligible,
   type ClinicalStatus,
 } from '../src/lib/camp/eligibility';
+import { PIPELINE_STAGES, TERMINAL_STAGES, isStalled } from '../src/lib/referral/stages';
 import type {
   ExposureSegmentInput,
   RiskResult,
@@ -435,16 +436,9 @@ function buildCohort(): GeneratedWorker[] {
 // Camps, screenings, referrals
 // ---------------------------------------------------------------------------
 
-const REFERRAL_STAGES = [
-  'REGISTERED',
-  'PRIMARY_CHECKUP',
-  'RADIOGRAPHER',
-  'RADIOLOGIST',
-  'MO_APPROVAL',
-  'BOARD',
-  'CERTIFIED',
-  'DISBURSED',
-] as const;
+// Imported, not redeclared: the seed and the analytics must agree on the
+// pipeline or the funnel measures something the data does not contain.
+const REFERRAL_STAGES = PIPELINE_STAGES;
 
 interface Plan {
   camps: {
@@ -837,7 +831,7 @@ function report(workers: GeneratedWorker[], plan: Plan): void {
     byStatus.set(referral.status, (byStatus.get(referral.status) ?? 0) + 1);
   }
   console.log('\nReferral pipeline:');
-  const ordered = [...REFERRAL_STAGES, 'REJECTED_NO_SYMPTOMS', 'REJECTED_POST_XRAY', 'LOST_TO_FOLLOWUP'];
+  const ordered = [...REFERRAL_STAGES, ...TERMINAL_STAGES];
   for (const stage of ordered) {
     const count = byStatus.get(stage) ?? 0;
     if (count === 0) continue;
@@ -845,9 +839,9 @@ function report(workers: GeneratedWorker[], plan: Plan): void {
     console.log(`  ${stage.padEnd(22)} ${String(count).padStart(4)}  ${share.padStart(5)}%`);
   }
 
-  const stalled = plan.referrals.filter(
-    (r) => r.daysInStage > 14 && !r.status.startsWith('REJECTED') && r.status !== 'LOST_TO_FOLLOWUP',
-  ).length;
+  // Uses the shared rule rather than reimplementing it — the seed's count and
+  // the tracker's count must be the same number.
+  const stalled = plan.referrals.filter((r) => isStalled(r.status, r.daysInStage)).length;
   console.log(`\n  stalled >14 days in stage   ${stalled}`);
 }
 
