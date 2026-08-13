@@ -400,17 +400,65 @@ describe('escalation rules in isolation', () => {
     expect(assessRisk(input(shortLowExposure(), worker)).escalations).toEqual([]);
   });
 
-  it('escalates at 15 years since first exposure, not 14', () => {
-    const at14 = assessRisk(
-      input([segment({ taskCode: 'LOAD', startYear: REF_YEAR - 14, endYear: REF_YEAR })]),
+  it('escalates at 15 years since first exposure, not 14 — once exposure has ended', () => {
+    const ended = (yearsAgo: number) =>
+      assessRisk(
+        input([
+          segment({
+            taskCode: 'LOAD',
+            startYear: REF_YEAR - yearsAgo,
+            endYear: REF_YEAR - 1,
+          }),
+        ]),
+      );
+
+    expect(ended(14).yearsSinceFirstExposure).toBe(14);
+    expect(ended(14).escalations).toEqual([]);
+    expect(ended(15).yearsSinceFirstExposure).toBe(15);
+    expect(ended(15).escalations).toEqual([{ code: 'LATENCY', applied: true }]);
+  });
+
+  it('does NOT escalate a long-tenure worker who is still exposed', () => {
+    // The double-counting fix. Long service is already inside cumulative
+    // exposure — CE is literally intensity × duration — so firing on tenure
+    // alone let the same years push the tier up twice. For a worker still in
+    // the quarry, CE keeps rising and already tracks them.
+    const stillWorking = assessRisk(
+      input([segment({ taskCode: 'LOAD', startYear: 1996, endYear: null })]),
     );
-    const at15 = assessRisk(
-      input([segment({ taskCode: 'LOAD', startYear: REF_YEAR - 15, endYear: REF_YEAR })]),
+    expect(stillWorking.yearsSinceFirstExposure).toBe(30);
+    expect(stillWorking.exposureEnded).toBe(false);
+    expect(stillWorking.escalations).toEqual([]);
+    expect(stillWorking.tier).toBe(stillWorking.baseTier);
+  });
+
+  it('treats a segment running into the reference year as still exposed', () => {
+    const thisYear = assessRisk(
+      input([segment({ taskCode: 'LOAD', startYear: 1996, endYear: REF_YEAR })]),
     );
-    expect(at14.yearsSinceFirstExposure).toBe(14);
-    expect(at14.escalations).toEqual([]);
-    expect(at15.yearsSinceFirstExposure).toBe(15);
-    expect(at15.escalations).toEqual([{ code: 'LATENCY', applied: true }]);
+    expect(thisYear.exposureEnded).toBe(false);
+    expect(thisYear.escalations).toEqual([]);
+  });
+
+  it('fires once the last segment stops, even by one year', () => {
+    const justStopped = assessRisk(
+      input([segment({ taskCode: 'LOAD', startYear: 1996, endYear: REF_YEAR - 1 })]),
+    );
+    expect(justStopped.exposureEnded).toBe(true);
+    expect(justStopped.yearsSinceLastExposure).toBe(1);
+    expect(justStopped.escalations).toEqual([{ code: 'LATENCY', applied: true }]);
+  });
+
+  it('counts exposure as ongoing if ANY segment is still running', () => {
+    // A worker who left drilling but still hauls has not left dusty work.
+    const mixed = assessRisk(
+      input([
+        segment({ taskCode: 'DRILL_DRY', startYear: 1996, endYear: 2005 }),
+        segment({ taskCode: 'HAUL', startYear: 2006, endYear: null }),
+      ]),
+    );
+    expect(mixed.exposureEnded).toBe(false);
+    expect(mixed.escalations).toEqual([]);
   });
 
   it('measures latency from first exposure, not from last', () => {
@@ -469,7 +517,7 @@ describe('escalations in combination', () => {
 
   it('records every rule that fired, but applies at most the step cap', () => {
     const result = assessRisk(
-      input([segment({ taskCode: 'LOAD', startYear: 1996, endYear: REF_YEAR })], allThree),
+      input([segment({ taskCode: 'LOAD', startYear: 1996, endYear: 2015 })], allThree),
     );
 
     expect(result.escalations.map((e) => e.code)).toEqual([
@@ -485,7 +533,7 @@ describe('escalations in combination', () => {
     // Current smoking has the thinnest literature support of the four, so it
     // is last in precedence and the first to lose its step.
     const result = assessRisk(
-      input([segment({ taskCode: 'LOAD', startYear: 1996, endYear: REF_YEAR })], allThree),
+      input([segment({ taskCode: 'LOAD', startYear: 1996, endYear: 2015 })], allThree),
     );
     const dropped = result.escalations.filter((e) => !e.applied).map((e) => e.code);
     expect(dropped).toEqual(['CURRENT_SMOKER']);

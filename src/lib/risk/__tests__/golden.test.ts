@@ -82,14 +82,25 @@ describe('golden file exercises the whole model', () => {
     expect(fired).toEqual(new Set(['PRIOR_TB', 'LATENCY', 'CURRENT_SMOKER']));
   });
 
-  it('confirms PEAK_INTENSITY never fires across any realistic profile', () => {
-    // Not desired behaviour — a documented dead rule. The 0.5 threshold sits
-    // above the matrix ceiling of 0.336. See RISK_MODEL.md §7.2.
-    const peaks = results.map((r) => r.peakIntensity);
-    expect(Math.max(...peaks)).toBeLessThan(0.5);
-    expect(results.every((r) => !r.escalations.some((e) => e.code === 'PEAK_INTENSITY'))).toBe(
-      true,
-    );
+  it('still reports peak intensity even though nothing acts on it', () => {
+    // The PEAK_INTENSITY rule was deleted at v1 (it fired for zero workers),
+    // but the figure is still computed and stored so a reviewer can see a
+    // worker's worst exposure concentration. If this ever drops to zero across
+    // the fixture, the measurement has been lost along with the rule.
+    expect(results.some((r) => r.peakIntensity > 0)).toBe(true);
+  });
+
+  it('fires LATENCY only for workers who have left dusty work', () => {
+    // The rule's whole justification is post-cessation progression. A worker
+    // still in the quarry has a rising CE that already tracks their risk;
+    // firing on tenure alone counted the same years twice.
+    for (const result of results) {
+      const latency = result.escalations.some((e) => e.code === 'LATENCY');
+      if (!latency) continue;
+      expect(result.exposureEnded).toBe(true);
+      expect(result.yearsSinceFirstExposure).toBeGreaterThanOrEqual(15);
+      expect(result.yearsSinceLastExposure).toBeGreaterThan(0);
+    }
   });
 
   it('never de-escalates any profile', () => {

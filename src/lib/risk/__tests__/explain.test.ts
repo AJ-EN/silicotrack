@@ -16,12 +16,7 @@ import { CLEAN_WORKER, REF_YEAR, input, segment } from './helpers';
 import type { EscalationCode, Tier } from '../types';
 
 const TIERS: Tier[] = [1, 2, 3, 4];
-const CODES: EscalationCode[] = [
-  'PRIOR_TB',
-  'PEAK_INTENSITY',
-  'LATENCY',
-  'CURRENT_SMOKER',
-];
+const CODES: EscalationCode[] = ['PRIOR_TB', 'LATENCY', 'CURRENT_SMOKER'];
 
 describe('the non-diagnosis statement is non-negotiable', () => {
   it('terminates every generated reason, in both languages', () => {
@@ -157,7 +152,10 @@ describe('reason content', () => {
       insufficientData: false,
     });
     expect(reason.en).toContain('prior TB');
-    expect(reason.en).toContain('15+ years since first exposure');
+    // States BOTH halves of the rule: the tenure interval AND that exposure
+    // has stopped. The old tenure-only wording would now describe workers the
+    // rule no longer fires for.
+    expect(reason.en).toContain('exposure ended, 15+ years since it began');
     expect(reason.en).not.toContain('current smoker');
     expect(reason.hi).not.toContain('वर्तमान धूम्रपान');
   });

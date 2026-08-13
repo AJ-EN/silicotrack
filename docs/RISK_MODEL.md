@@ -29,7 +29,7 @@ done
 
 No summary count is stated here on purpose — a hardcoded tally drifts out of date on the first edit, and a stale provenance count in a document about provenance discipline would be worse than none.
 
-**The short version: the only `[LIT]` numbers in this model are the tier-4 anchor at 4.0 mg/m³·years, the measured Rajasthan sandstone intensity of 0.12 mg/m³, the regulatory limits, and the epidemiological figures used to justify escalation rules. Everything else — every control modifier, every rescreen interval, two of the three tier boundaries, and the peak-intensity threshold — is a judgement call.**
+**The short version: the only `[LIT]` numbers in this model are the tier-4 anchor at 4.0 mg/m³·years, the measured Rajasthan sandstone intensity of 0.12 mg/m³, the regulatory limits, and the epidemiological figures used to justify escalation rules. Everything else — every control modifier, every rescreen interval, and two of the three tier boundaries — is a judgement call.**
 
 ---
 
@@ -64,7 +64,7 @@ That claim rests on three propositions, each independently sourced:
 | `M_controls` | Dimensionless product of control modifiers | — |
 | `D` | Duration of a segment, normalised to full-time equivalent | years |
 | `CE` | Cumulative exposure | mg/m³·years |
-| `P` | Peak intensity | mg/m³ |
+| `P` | Peak intensity — reported, not modelled at v1 (§7.2) | mg/m³ |
 | `TSFE` | Time since first exposure | years |
 
 **All exposures are respirable crystalline silica**, not respirable dust. These differ by roughly 4× in Rajasthan sandstone — mean respirable dust 0.47 mg/m³ against mean RCS 0.12 mg/m³ `[LIT]` (Prajapati et al. 2020). Conflating the two would inflate every score by a factor of four. Any JEM entry sourced from a dust measurement must be silica-fraction-corrected before entry, and the correction recorded in `JEM_SOURCES.md`.
@@ -296,9 +296,10 @@ Three things follow, and they sharpen the §7.1 decision rather than settling it
 | Rule | Evidence | Grade |
 |---|---|---|
 | `priorTB === true` | Strong — but causally inverted, see below | `[LIT]`-supported, `[CAL]` application |
-| `TSFE >= 15` | Good | `[CAL]`, literature-consistent |
-| `peakIntensity >= 0.5` | Mechanism strong, threshold invented | `[CAL]` |
+| `exposureEnded && TSFE >= 15` | Good | `[CAL]`, literature-consistent |
 | `smokingStatus === 'current'` | Weak and contested | `[CAL]`, weakest rule |
+
+**`peakIntensity >= 0.5` was REMOVED at v1.** It fired for zero of 500 workers. See "Peak intensity is not modelled" below.
 
 ---
 
@@ -314,7 +315,7 @@ State it this way in review. A panel member who knows this literature will notic
 
 ---
 
-#### `TSFE >= 15`
+#### `exposureEnded && TSFE >= 15`
 
 **Evidence `[CAL]`, literature-consistent.** Two independent supports:
 
@@ -323,47 +324,53 @@ State it this way in review. A panel member who knows this literature will notic
 
 The 15-year threshold is set at the observed floor of tenure among silicotic Rajasthan sandstone workers rather than at the meta-analysis's more conservative 20, because this model's purpose is to catch cases *before* they are established. Choosing 15 over 20 is the calibration choice. `[CAL]`
 
-**Specification hazard — TSFE is not tenure.** TSFE is measured from first exposure to the reference date and keeps growing after a worker leaves the industry. The literature values above are *duration of employment*. For a currently-employed worker the two roughly coincide; for a worker who left in 2005 they diverge sharply. This is intentional — silicosis progresses after exposure ceases — but it means the rule is applied slightly outside the sense in which its supporting numbers were measured. Document this; do not paper over it.
+**Specification hazard — TSFE is not tenure.** TSFE is measured from first exposure to the reference date and keeps growing after a worker leaves the industry. The literature values above are *duration of employment*. For a currently-employed worker the two roughly coincide; for a worker who left in 2005 they diverge sharply.
+
+> ### The cessation requirement — added at v1 to stop double-counting
+>
+> The rule originally fired on `TSFE >= 15` alone. That **counted tenure twice.**
+>
+> Cumulative exposure is literally intensity × duration. A worker's years are already the second term of `CE`. Firing an escalation on those same years let them raise the tier a second time, on top of the exposure they had themselves produced — so a long-serving worker was penalised once through `CE` and again through `LATENCY`, for one fact.
+>
+> The rule now requires **`exposureEnded && TSFE >= 15`**: it fires only for workers with no segment running into the reference year.
+>
+> What tenure does not capture, and what this rule now isolates, is that **silicosis progresses after exposure stops.** For a worker still in the quarry, `CE` keeps rising and already tracks them — the model needs no help. For a worker who left, `CE` is frozen at whatever it reached while the disease is not. That worker is the one whose exposure figure understates their risk, and they are now the only population this rule covers.
+>
+> **Measured effect on the 500-worker cohort:** hit rate fell from **267 (53.4%)** to **61 (12.2%)**, and sole-trigger from 187 (37.4%) to 41 (8.2%). Tier 4 fell from 19.0% to 11.2%. The rule stopped being the escalation model and became one signal among three.
+>
+> **Open question — which clock?** The rule's justification is post-cessation progression, but its threshold still reads `TSFE` (time since exposure BEGAN). A worker who started 16 years ago and stopped last month fires it, having had one month of post-cessation progression. `yearsSinceLastExposure` is computed and returned on every result specifically so this can be reconsidered as a one-line change. Not changed unilaterally: switching clocks would move the rule off the Rajavel tenure evidence that currently supports the 15-year figure, and onto ground with no cited threshold at all.
 
 ---
 
-#### `peakIntensity >= 0.5`
+#### Peak intensity is NOT modelled at v1 — rule removed
 
-**Mechanism `[LIT]`, threshold `[CAL]`.** That peak intensity matters independently of cumulative dose is well supported. Buchanan, Miller & Soutar (*Occup Environ Med* 2003), reanalysing 371 Scottish colliery workers aged 50–74, found that **1 g·h·m⁻³ of cumulative exposure accrued at quartz concentrations above 2 mg/m³ carried risk equivalent to 3 g·h·m⁻³ accrued at lower concentrations** — roughly a threefold risk premium per unit dose for high-intensity exposure. They also estimated ~20% probability of silicosis after 15 years at a mean 8-hour concentration of 0.3 mg/m³.
+**There is no peak-intensity escalation.** A `peakIntensity >= 0.5` rule was specified, implemented, and then **deleted** after it was shown to fire for **zero of 500 workers**.
 
-This is a genuine and citable justification for a separate peak term. **It does not justify the value 0.5.**
+**Why it was removed rather than retuned.**
 
-**Buchanan's own inflection is at 2 mg/m³, four times the threshold used here.** The 0.5 figure is a calibration choice with a different rationale:
+The mechanism is real and citable. Buchanan, Miller & Soutar (*Occup Environ Med* 2003), reanalysing 371 Scottish colliery workers aged 50–74, found that **1 g·h·m⁻³ of cumulative exposure accrued at quartz concentrations above 2 mg/m³ carried risk equivalent to 3 g·h·m⁻³ accrued at lower concentrations** `[LIT]` — roughly a threefold risk premium per unit dose for high-intensity exposure. Peak matters independently of cumulative dose. That is not in dispute.
 
-- ≈ 4× the measured Rajasthan sandstone mean of 0.12 mg/m³ `[LIT]`
-- ≈ 3.3× the Indian DGMS permissible limit of 0.15 mg/m³ `[LIT]`
-- ≈ 10× the OSHA/NIOSH limit of 0.05 mg/m³ `[LIT]`
+What was never justified is the number **0.5**. Buchanan's own inflection sits at **2 mg/m³**, four times higher. The 0.5 figure was a regulatory analogy — ≈3.3× the Indian DGMS limit of 0.15, ≈10× the OSHA/NIOSH limit of 0.05 — not an epidemiological threshold.
 
-So 0.5 marks "substantially above the regulatory limit in the local context" rather than "above the concentration at which Buchanan observed a risk premium." Using Buchanan's 2.0 would, against a JEM centred on 0.12, flag almost nobody and render the rule inert.
+And it was unreachable. The highest intensity in `jem-raj-sandstone-0.1.0` is `DRILL_DRY` at **0.28 mg/m³**; the largest possible control product is **1.2** (underground, no other controls). The ceiling is therefore:
 
-> ### ⚠ This rule is currently DEAD CODE. It can never fire.
->
-> Established during implementation, not by inspection of this document.
->
-> The highest intensity in `jem-raj-sandstone-0.1.0` is `DRILL_DRY` at **0.28 mg/m³**. The largest possible control product is **1.2** (underground, no other controls; every other modifier is ≤ 1.0). The ceiling on `peakIntensity` is therefore:
->
-> ```
-> 0.28 × 1.2 = 0.336 mg/m³   <   0.5 threshold
-> ```
->
-> **No worker, doing any task in the matrix, under any combination of interview answers, can trigger this escalation.** It contributes nothing to any tier assignment. All 20 golden profiles confirm it: the highest peak observed across the fixture is 0.28.
->
-> This is pinned by two tests — `PEAK_INTENSITY is currently unreachable — known finding` in `engine.test.ts` and `confirms PEAK_INTENSITY never fires` in `golden.test.ts` — which assert **current reality, not desired behaviour**. They will fail the moment either the threshold or the matrix moves, forcing a deliberate decision rather than a silent one.
->
-> **Three ways out, all requiring sign-off:**
->
-> 1. **Lower the threshold** to ~0.25 mg/m³ — roughly 1.7× the DGMS limit, and reachable by dry drilling and crushing. Keeps the rule's intent, abandons any claim to Buchanan's inflection point.
-> 2. **Raise the JEM's high end.** Defensible only if task-stratified measurement supports it; the anchoring constraint (§4.1) caps how far the matrix mean can move, though individual task peaks could rise with compensating falls elsewhere.
-> 3. **Delete the rule** and state that peak intensity is not modelled at v1. Honest, and arguably cleanest until a sourced JEM exists.
->
-> **Do not leave it as-is silently.** A rule that appears in the specification, appears in the output contract, and never fires is worse than no rule: it implies a safeguard that does not exist.
+```
+0.28 × 1.2 = 0.336 mg/m³   <   0.5 threshold
+```
 
-**This remains the model's most vulnerable single number.** Its rationale is regulatory rather than epidemiological, it is off by 4× from the one published inflection point available, and it is currently inert. It is flagged here so it is found by the project rather than by a reviewer.
+Confirmed empirically: 0 of 500 synthetic workers, and 0 of 20 golden profiles, ever triggered it.
+
+**A rule that appears in the specification and never fires is worse than no rule.** It implies a safeguard that does not exist, and a reviewer who checks will find a system claiming to account for peak exposure while doing nothing of the kind. Lowering the threshold to make it fire would have been worse still — it would have invented a number to justify a number, and the JEM it would be measured against is itself entirely provisional.
+
+**What is retained.** `peakIntensity` is still computed, returned on every `RiskResult`, and stored on every assessment. A reviewer asking "what was this worker's worst exposure concentration" gets an answer. It simply does not move a tier.
+
+**What reinstating it would require**, in order:
+
+1. A JEM with at least one sourced, task-stratified measurement above the intended threshold — not a lowered threshold against provisional coefficients.
+2. A threshold derived from that measurement or from Buchanan's 2 mg/m³ inflection, not from a regulatory multiple.
+3. Evidence it fires for a non-trivial and clinically sensible share of a real cohort.
+
+Until then this is stated plainly in the UI and in the README: **peak exposure intensity is recorded but not yet modelled.**
 
 ---
 
@@ -505,7 +512,7 @@ Stated in the order a hostile technical reviewer would raise them.
 1. **The JEM is invented.** Mitigated by the 0.12 mg/m³ anchoring constraint (§4.1) and by making the matrix editable and auditable, not by pretending otherwise. Remains the primary risk.
 2. **Cohort curves applied to individuals.** Addressed by claiming only ordering, not individual risk (§1). The claim must stay narrow in every artefact — UI, README, video script.
 3. **Recall bias in occupational history.** Workers self-report tasks and years, often across informal and unregistered quarries, sometimes decades back. There is no employer record to corroborate against — that absence is precisely why the registry is person-linked. Systematic under-reporting would bias the whole cohort downward. Unquantified and currently unmitigated.
-4. **`peakIntensity >= 0.5` is dead code — the rule cannot fire at all** (§7.2). The matrix ceiling is 0.336 mg/m³. A specified safeguard that never triggers is worse than an absent one. Known, pinned by test, unresolved pending sign-off.
+4. **Peak exposure intensity is not modelled at all** (§7.2). The rule was removed after firing for zero of 500 workers; the figure is still computed and reported but moves nothing. Reinstating it requires a sourced JEM, not a lower threshold.
 5. **The CXR sensitivity figure comes from the wrong population.** Hoy et al. studied **artificial stone benchtop workers** — engineered quartz, silica content far above natural sandstone, a young cohort with rapidly progressive disease. The 48% sensitivity figure is used here to justify not relying on radiography as a *selector*. It should not be presented as the sensitivity that would be observed in Rajasthan sandstone miners, and the README should carry this caveat too.
 6. **Rescreen intervals are wholly unsourced** (§8).
 7. **The overlap rule has no external justification** (§3.2) and materially affects multi-task workers, who are common.

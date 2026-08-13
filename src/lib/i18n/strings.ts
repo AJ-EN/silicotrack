@@ -164,8 +164,10 @@ export const STRINGS = {
 
   // --- Escalation reasons ---
   'esc.PRIOR_TB': { hi: 'पहले टीबी हुई थी', en: 'Prior TB' },
-  'esc.PEAK_INTENSITY': { hi: 'बहुत अधिक धूल वाला काम', en: 'High peak exposure' },
-  'esc.LATENCY': { hi: 'पहले जोखिम को 15+ वर्ष', en: '15+ years since first exposure' },
+  'esc.LATENCY': {
+    hi: 'धूल का काम छोड़ चुके, शुरुआत को 15+ वर्ष',
+    en: 'Left dusty work, 15+ years since it began',
+  },
   'esc.CURRENT_SMOKER': { hi: 'अभी धूम्रपान करते हैं', en: 'Current smoker' },
 
   // --- The disclaimers. Never render a score without these. ---

@@ -54,15 +54,16 @@ const TIER_LABEL_HI: Readonly<Record<Tier, string>> = {
 
 const ESCALATION_LABEL_EN: Readonly<Record<EscalationCode, string>> = {
   PRIOR_TB: 'prior TB',
-  PEAK_INTENSITY: 'high peak exposure intensity',
-  LATENCY: '15+ years since first exposure',
+  // Must state BOTH halves of the rule. "15+ years since first exposure" alone
+  // was the old, tenure-only wording, and would now describe workers the rule
+  // no longer fires for.
+  LATENCY: 'exposure ended, 15+ years since it began',
   CURRENT_SMOKER: 'current smoker',
 };
 
 const ESCALATION_LABEL_HI: Readonly<Record<EscalationCode, string>> = {
   PRIOR_TB: 'पूर्व टीबी',
-  PEAK_INTENSITY: 'उच्च शिखर जोखिम तीव्रता',
-  LATENCY: 'पहले जोखिम के 15+ वर्ष',
+  LATENCY: 'जोखिम समाप्त, शुरुआत को 15+ वर्ष',
   CURRENT_SMOKER: 'वर्तमान धूम्रपान',
 };
 

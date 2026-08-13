@@ -289,6 +289,25 @@ function generateWorker(index: number, district: DistrictProfile): GeneratedWork
 
   // Split the career across the archetype's task sequence. Early tasks are
   // entry-level and shorter; the main task carries the remainder.
+  /**
+   * Has this worker left dusty work?
+   *
+   * A registry is not only current workers. Migrants return to their villages,
+   * quarries close, people leave after illness. Older workers are likelier to
+   * have gone.
+   *
+   * This matters to the model, not just to realism: former workers are exactly
+   * who the LATENCY rule now exists for. Their cumulative exposure is frozen
+   * at whatever it reached, but silicosis keeps progressing, so the exposure
+   * figure alone understates them. A cohort where nobody ever leaves cannot
+   * exercise that rule at all.
+   */
+  const leftIndustry = age >= 50 ? chance(0.34) : age >= 40 ? chance(0.2) : chance(0.07);
+  const exitYearsAgo = leftIndustry
+    ? randInt(1, Math.min(18, Math.max(1, totalTenure - 1)))
+    : 0;
+  const careerEnd = REFERENCE_YEAR - exitYearsAgo;
+
   const segments: GeneratedWorker['segments'] = [];
   let cursor = REFERENCE_YEAR - totalTenure;
 
@@ -300,7 +319,7 @@ function generateWorker(index: number, district: DistrictProfile): GeneratedWork
   if (!interviewIncomplete) {
     tasks.forEach((taskCode, position) => {
       const isLast = position === tasks.length - 1;
-      const remaining = REFERENCE_YEAR - cursor;
+      const remaining = careerEnd - cursor;
       if (remaining < 1) return;
 
       const span = isLast
@@ -308,7 +327,8 @@ function generateWorker(index: number, district: DistrictProfile): GeneratedWork
         : Math.max(1, Math.min(remaining - 1, Math.round(totalTenure * 0.3)));
 
       const startYear = cursor;
-      const endYear = isLast ? null : cursor + span - 1;
+      // Only a worker still in the industry gets an ongoing (null) end year.
+      const endYear = isLast ? (exitYearsAgo > 0 ? careerEnd : null) : cursor + span - 1;
       cursor += span;
 
       // Wet methods arrived late and unevenly. Segments beginning after 2015
@@ -736,6 +756,12 @@ function report(workers: GeneratedWorker[], plan: Plan): void {
   // held; `applied` is how often it claimed one of the limited escalation
   // steps; `sole` is how often it was the ONLY rule firing for that worker,
   // which is the closest thing to that rule's marginal effect on the cohort.
+  const formerWorkers = workers.filter((w) => w.result.exposureEnded).length;
+  console.log(
+    `\nWorkforce status: ${formerWorkers} (${((formerWorkers / total) * 100).toFixed(1)}%) ` +
+      'have left dusty work; their cumulative exposure is frozen.',
+  );
+
   console.log('\nEscalation rules — individual cohort hit-rate:');
   console.log(`  ${'rule'.padEnd(16)}${'fired'.padStart(14)}${'applied'.padStart(14)}${'sole trigger'.padStart(16)}`);
 

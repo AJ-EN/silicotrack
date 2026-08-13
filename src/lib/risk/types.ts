@@ -51,11 +51,11 @@ export interface WorkerRiskFacts {
   priorTB: boolean;
 }
 
-export type EscalationCode =
-  | 'PRIOR_TB'
-  | 'PEAK_INTENSITY'
-  | 'LATENCY'
-  | 'CURRENT_SMOKER';
+/**
+ * PEAK_INTENSITY was removed at v1 — it fired for zero of 500 workers because
+ * its threshold sat above the JEM ceiling. See RISK_MODEL.md §7.2.
+ */
+export type EscalationCode = 'PRIOR_TB' | 'LATENCY' | 'CURRENT_SMOKER';
 
 export interface EscalationReason {
   code: EscalationCode;
@@ -98,9 +98,27 @@ export interface TaskContribution {
 export interface RiskResult {
   /** mg/m³·years, 2dp. */
   cumulativeExposure: number;
-  /** mg/m³, 2dp. Highest single-segment intensity after control modifiers. */
+  /**
+   * mg/m³, 2dp. Highest single-segment intensity after control modifiers.
+   *
+   * REPORTED BUT NOT ACTED ON. No escalation reads this at v1; it is here so a
+   * reviewer can see a worker's worst exposure concentration, and because peak
+   * is good evidence of risk independent of cumulative dose (Buchanan et al.
+   * 2003). Reinstating it as a rule needs a sourced JEM, not a lower threshold.
+   */
   peakIntensity: number;
   yearsSinceFirstExposure: number;
+  /**
+   * Years since the worker's most recent exposure ended. Zero while still
+   * exposed.
+   *
+   * Reported alongside TSFE because the two answer different questions, and
+   * the LATENCY rule arguably wants this clock rather than TSFE — see the
+   * open question in RISK_MODEL.md §7.2.
+   */
+  yearsSinceLastExposure: number;
+  /** True when no recorded segment runs into the reference year. */
+  exposureEnded: boolean;
   /** Tier from cumulative exposure alone, before escalation. */
   baseTier: Tier;
   /** Final tier, after escalation. Never lower than `baseTier`. */

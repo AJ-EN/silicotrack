@@ -6,6 +6,8 @@
       "cumulativeExposure": 0.15,
       "peakIntensity": 0.05,
       "yearsSinceFirstExposure": 2,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 1,
       "tier": 1,
       "escalations": [],
@@ -34,6 +36,8 @@
       "cumulativeExposure": 0,
       "peakIntensity": 0,
       "yearsSinceFirstExposure": 0,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 1,
       "tier": 1,
       "escalations": [],
@@ -54,6 +58,8 @@
       "cumulativeExposure": 3.36,
       "peakIntensity": 0.28,
       "yearsSinceFirstExposure": 11,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 3,
       "tier": 3,
       "escalations": [],
@@ -82,15 +88,12 @@
       "cumulativeExposure": 1.8,
       "peakIntensity": 0.18,
       "yearsSinceFirstExposure": 19,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 2,
-      "tier": 3,
-      "escalations": [
-        {
-          "code": "LATENCY",
-          "applied": true
-        }
-      ],
-      "rescreenMonths": 24,
+      "tier": 2,
+      "escalations": [],
+      "rescreenMonths": 36,
       "topContributors": [
         {
           "taskCode": "CUT_DRY",
@@ -100,8 +103,8 @@
           "calendarYears": 20
         }
       ],
-      "reasonEn": "High — 1.80 mg/m³·years cumulative silica exposure, mainly 20 years of dry cutting / sawing (100.0% of total). Escalated for 15+ years since first exposure. Not a diagnosis.",
-      "reasonHi": "उच्च — संचयी सिलिका जोखिम 1.80 mg/m³·वर्ष, मुख्यतः सूखी कटाई के 20 वर्षों से (कुल का 100.0%)। पहले जोखिम के 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
+      "reasonEn": "Moderate — 1.80 mg/m³·years cumulative silica exposure, mainly 20 years of dry cutting / sawing (100.0% of total). Not a diagnosis.",
+      "reasonHi": "मध्यम — संचयी सिलिका जोखिम 1.80 mg/m³·वर्ष, मुख्यतः सूखी कटाई के 20 वर्षों से (कुल का 100.0%)। यह निदान नहीं है।",
       "modelVersion": "risk-model-0.1.0",
       "jemVersion": "jem-raj-sandstone-0.1.0",
       "confidence": "provisional",
@@ -115,15 +118,12 @@
       "cumulativeExposure": 0.53,
       "peakIntensity": 0.02,
       "yearsSinceFirstExposure": 24,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 1,
-      "tier": 2,
-      "escalations": [
-        {
-          "code": "LATENCY",
-          "applied": true
-        }
-      ],
-      "rescreenMonths": 36,
+      "tier": 1,
+      "escalations": [],
+      "rescreenMonths": 60,
       "topContributors": [
         {
           "taskCode": "DRILL_WET",
@@ -133,8 +133,8 @@
           "calendarYears": 25
         }
       ],
-      "reasonEn": "Moderate — 0.53 mg/m³·years cumulative silica exposure, mainly 25 years of wet drilling (100.0% of total). Escalated for 15+ years since first exposure. Not a diagnosis.",
-      "reasonHi": "मध्यम — संचयी सिलिका जोखिम 0.53 mg/m³·वर्ष, मुख्यतः गीली ड्रिलिंग के 25 वर्षों से (कुल का 100.0%)। पहले जोखिम के 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
+      "reasonEn": "Low — 0.53 mg/m³·years cumulative silica exposure, mainly 25 years of wet drilling (100.0% of total). Not a diagnosis.",
+      "reasonHi": "कम — संचयी सिलिका जोखिम 0.53 mg/m³·वर्ष, मुख्यतः गीली ड्रिलिंग के 25 वर्षों से (कुल का 100.0%)। यह निदान नहीं है।",
       "modelVersion": "risk-model-0.1.0",
       "jemVersion": "jem-raj-sandstone-0.1.0",
       "confidence": "provisional",
@@ -148,6 +148,8 @@
       "cumulativeExposure": 3,
       "peakIntensity": 0.28,
       "yearsSinceFirstExposure": 14,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 3,
       "tier": 3,
       "escalations": [],
@@ -183,15 +185,12 @@
       "cumulativeExposure": 0.53,
       "peakIntensity": 0.02,
       "yearsSinceFirstExposure": 34,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 1,
-      "tier": 2,
-      "escalations": [
-        {
-          "code": "LATENCY",
-          "applied": true
-        }
-      ],
-      "rescreenMonths": 36,
+      "tier": 1,
+      "escalations": [],
+      "rescreenMonths": 60,
       "topContributors": [
         {
           "taskCode": "HAUL",
@@ -201,8 +200,8 @@
           "calendarYears": 35
         }
       ],
-      "reasonEn": "Moderate — 0.53 mg/m³·years cumulative silica exposure, mainly 35 years of hauling / transport (100.0% of total). Escalated for 15+ years since first exposure. Not a diagnosis.",
-      "reasonHi": "मध्यम — संचयी सिलिका जोखिम 0.53 mg/m³·वर्ष, मुख्यतः ढुलाई के 35 वर्षों से (कुल का 100.0%)। पहले जोखिम के 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
+      "reasonEn": "Low — 0.53 mg/m³·years cumulative silica exposure, mainly 35 years of hauling / transport (100.0% of total). Not a diagnosis.",
+      "reasonHi": "कम — संचयी सिलिका जोखिम 0.53 mg/m³·वर्ष, मुख्यतः ढुलाई के 35 वर्षों से (कुल का 100.0%)। यह निदान नहीं है।",
       "modelVersion": "risk-model-0.1.0",
       "jemVersion": "jem-raj-sandstone-0.1.0",
       "confidence": "provisional",
@@ -216,15 +215,12 @@
       "cumulativeExposure": 1.25,
       "peakIntensity": 0.07,
       "yearsSinceFirstExposure": 21,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 2,
-      "tier": 3,
-      "escalations": [
-        {
-          "code": "LATENCY",
-          "applied": true
-        }
-      ],
-      "rescreenMonths": 24,
+      "tier": 2,
+      "escalations": [],
+      "rescreenMonths": 36,
       "topContributors": [
         {
           "taskCode": "LOAD",
@@ -241,8 +237,8 @@
           "calendarYears": 22
         }
       ],
-      "reasonEn": "High — 1.25 mg/m³·years cumulative silica exposure, mainly 22 years of loading (58.8% of total). Escalated for 15+ years since first exposure. Not a diagnosis.",
-      "reasonHi": "उच्च — संचयी सिलिका जोखिम 1.25 mg/m³·वर्ष, मुख्यतः पत्थर लदान के 22 वर्षों से (कुल का 58.8%)। पहले जोखिम के 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
+      "reasonEn": "Moderate — 1.25 mg/m³·years cumulative silica exposure, mainly 22 years of loading (58.8% of total). Not a diagnosis.",
+      "reasonHi": "मध्यम — संचयी सिलिका जोखिम 1.25 mg/m³·वर्ष, मुख्यतः पत्थर लदान के 22 वर्षों से (कुल का 58.8%)। यह निदान नहीं है।",
       "modelVersion": "risk-model-0.1.0",
       "jemVersion": "jem-raj-sandstone-0.1.0",
       "confidence": "provisional",
@@ -256,15 +252,12 @@
       "cumulativeExposure": 1.8,
       "peakIntensity": 0.09,
       "yearsSinceFirstExposure": 19,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 2,
-      "tier": 3,
-      "escalations": [
-        {
-          "code": "LATENCY",
-          "applied": true
-        }
-      ],
-      "rescreenMonths": 24,
+      "tier": 2,
+      "escalations": [],
+      "rescreenMonths": 36,
       "topContributors": [
         {
           "taskCode": "CARVE",
@@ -274,8 +267,8 @@
           "calendarYears": 20
         }
       ],
-      "reasonEn": "High — 1.80 mg/m³·years cumulative silica exposure, mainly 20 years of carving (100.0% of total). Escalated for 15+ years since first exposure. Not a diagnosis.",
-      "reasonHi": "उच्च — संचयी सिलिका जोखिम 1.80 mg/m³·वर्ष, मुख्यतः नक्काशी के 20 वर्षों से (कुल का 100.0%)। पहले जोखिम के 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
+      "reasonEn": "Moderate — 1.80 mg/m³·years cumulative silica exposure, mainly 20 years of carving (100.0% of total). Not a diagnosis.",
+      "reasonHi": "मध्यम — संचयी सिलिका जोखिम 1.80 mg/m³·वर्ष, मुख्यतः नक्काशी के 20 वर्षों से (कुल का 100.0%)। यह निदान नहीं है।",
       "modelVersion": "risk-model-0.1.0",
       "jemVersion": "jem-raj-sandstone-0.1.0",
       "confidence": "provisional",
@@ -289,6 +282,8 @@
       "cumulativeExposure": 1.22,
       "peakIntensity": 0.15,
       "yearsSinceFirstExposure": 7,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 2,
       "tier": 2,
       "escalations": [],
@@ -317,6 +312,8 @@
       "cumulativeExposure": 3.3,
       "peakIntensity": 0.22,
       "yearsSinceFirstExposure": 14,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 3,
       "tier": 3,
       "escalations": [],
@@ -345,6 +342,8 @@
       "cumulativeExposure": 4.48,
       "peakIntensity": 0.28,
       "yearsSinceFirstExposure": 41,
+      "yearsSinceLastExposure": 26,
+      "exposureEnded": true,
       "baseTier": 4,
       "tier": 4,
       "escalations": [
@@ -363,8 +362,8 @@
           "calendarYears": 16
         }
       ],
-      "reasonEn": "Priority — 4.48 mg/m³·years cumulative silica exposure, mainly 16 years of dry drilling (100.0% of total). Escalated for 15+ years since first exposure. Not a diagnosis.",
-      "reasonHi": "प्राथमिकता — संचयी सिलिका जोखिम 4.48 mg/m³·वर्ष, मुख्यतः सूखी ड्रिलिंग के 16 वर्षों से (कुल का 100.0%)। पहले जोखिम के 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
+      "reasonEn": "Priority — 4.48 mg/m³·years cumulative silica exposure, mainly 16 years of dry drilling (100.0% of total). Escalated for exposure ended, 15+ years since it began. Not a diagnosis.",
+      "reasonHi": "प्राथमिकता — संचयी सिलिका जोखिम 4.48 mg/m³·वर्ष, मुख्यतः सूखी ड्रिलिंग के 16 वर्षों से (कुल का 100.0%)। जोखिम समाप्त, शुरुआत को 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
       "modelVersion": "risk-model-0.1.0",
       "jemVersion": "jem-raj-sandstone-0.1.0",
       "confidence": "provisional",
@@ -378,6 +377,8 @@
       "cumulativeExposure": 2.34,
       "peakIntensity": 0.18,
       "yearsSinceFirstExposure": 12,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 3,
       "tier": 4,
       "escalations": [
@@ -406,12 +407,14 @@
   },
   {
     "id": "P14",
-    "description": "Every escalation fires: current smoker, prior TB, thirty years since first exposure",
+    "description": "Every escalation fires: left dusty work in 2015, current smoker, prior TB",
     "result": {
-      "cumulativeExposure": 5.58,
+      "cumulativeExposure": 3.6,
       "peakIntensity": 0.18,
       "yearsSinceFirstExposure": 30,
-      "baseTier": 4,
+      "yearsSinceLastExposure": 11,
+      "exposureEnded": true,
+      "baseTier": 3,
       "tier": 4,
       "escalations": [
         {
@@ -431,14 +434,14 @@
       "topContributors": [
         {
           "taskCode": "CUT_DRY",
-          "contribution": 5.58,
+          "contribution": 3.6,
           "percentOfTotal": 100,
-          "fteYears": 31,
-          "calendarYears": 31
+          "fteYears": 20,
+          "calendarYears": 20
         }
       ],
-      "reasonEn": "Priority — 5.58 mg/m³·years cumulative silica exposure, mainly 31 years of dry cutting / sawing (100.0% of total). Escalated for prior TB, 15+ years since first exposure. Not a diagnosis.",
-      "reasonHi": "प्राथमिकता — संचयी सिलिका जोखिम 5.58 mg/m³·वर्ष, मुख्यतः सूखी कटाई के 31 वर्षों से (कुल का 100.0%)। पूर्व टीबी, पहले जोखिम के 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
+      "reasonEn": "Priority — 3.60 mg/m³·years cumulative silica exposure, mainly 20 years of dry cutting / sawing (100.0% of total). Escalated for prior TB, exposure ended, 15+ years since it began. Not a diagnosis.",
+      "reasonHi": "प्राथमिकता — संचयी सिलिका जोखिम 3.60 mg/m³·वर्ष, मुख्यतः सूखी कटाई के 20 वर्षों से (कुल का 100.0%)। पूर्व टीबी, जोखिम समाप्त, शुरुआत को 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
       "modelVersion": "risk-model-0.1.0",
       "jemVersion": "jem-raj-sandstone-0.1.0",
       "confidence": "provisional",
@@ -452,14 +455,11 @@
       "cumulativeExposure": 4.45,
       "peakIntensity": 0.28,
       "yearsSinceFirstExposure": 28,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 4,
       "tier": 4,
-      "escalations": [
-        {
-          "code": "LATENCY",
-          "applied": true
-        }
-      ],
+      "escalations": [],
       "rescreenMonths": 12,
       "topContributors": [
         {
@@ -484,8 +484,8 @@
           "calendarYears": 9
         }
       ],
-      "reasonEn": "Priority — 4.45 mg/m³·years cumulative silica exposure, mainly 10 years of dry drilling (62.9% of total). Escalated for 15+ years since first exposure. Not a diagnosis.",
-      "reasonHi": "प्राथमिकता — संचयी सिलिका जोखिम 4.45 mg/m³·वर्ष, मुख्यतः सूखी ड्रिलिंग के 10 वर्षों से (कुल का 62.9%)। पहले जोखिम के 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
+      "reasonEn": "Priority — 4.45 mg/m³·years cumulative silica exposure, mainly 10 years of dry drilling (62.9% of total). Not a diagnosis.",
+      "reasonHi": "प्राथमिकता — संचयी सिलिका जोखिम 4.45 mg/m³·वर्ष, मुख्यतः सूखी ड्रिलिंग के 10 वर्षों से (कुल का 62.9%)। यह निदान नहीं है।",
       "modelVersion": "risk-model-0.1.0",
       "jemVersion": "jem-raj-sandstone-0.1.0",
       "confidence": "provisional",
@@ -499,6 +499,8 @@
       "cumulativeExposure": 2.7,
       "peakIntensity": 0.18,
       "yearsSinceFirstExposure": 9,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 3,
       "tier": 3,
       "escalations": [],
@@ -527,15 +529,12 @@
       "cumulativeExposure": 1.92,
       "peakIntensity": 0.12,
       "yearsSinceFirstExposure": 15,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 2,
-      "tier": 3,
-      "escalations": [
-        {
-          "code": "LATENCY",
-          "applied": true
-        }
-      ],
-      "rescreenMonths": 24,
+      "tier": 2,
+      "escalations": [],
+      "rescreenMonths": 36,
       "topContributors": [
         {
           "taskCode": "OTHER",
@@ -545,8 +544,8 @@
           "calendarYears": 16
         }
       ],
-      "reasonEn": "High — 1.92 mg/m³·years cumulative silica exposure, mainly 16 years of other sandstone work (100.0% of total). Escalated for 15+ years since first exposure. Not a diagnosis.",
-      "reasonHi": "उच्च — संचयी सिलिका जोखिम 1.92 mg/m³·वर्ष, मुख्यतः अन्य कार्य के 16 वर्षों से (कुल का 100.0%)। पहले जोखिम के 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
+      "reasonEn": "Moderate — 1.92 mg/m³·years cumulative silica exposure, mainly 16 years of other sandstone work (100.0% of total). Not a diagnosis.",
+      "reasonHi": "मध्यम — संचयी सिलिका जोखिम 1.92 mg/m³·वर्ष, मुख्यतः अन्य कार्य के 16 वर्षों से (कुल का 100.0%)। यह निदान नहीं है।",
       "modelVersion": "risk-model-0.1.0",
       "jemVersion": "jem-raj-sandstone-0.1.0",
       "confidence": "provisional",
@@ -560,14 +559,11 @@
       "cumulativeExposure": 8,
       "peakIntensity": 0.28,
       "yearsSinceFirstExposure": 39,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 4,
       "tier": 4,
-      "escalations": [
-        {
-          "code": "LATENCY",
-          "applied": true
-        }
-      ],
+      "escalations": [],
       "rescreenMonths": 12,
       "topContributors": [
         {
@@ -592,8 +588,8 @@
           "calendarYears": 10
         }
       ],
-      "reasonEn": "Priority — 8.00 mg/m³·years cumulative silica exposure, mainly 10 years of dry drilling (35.0% of total). Escalated for 15+ years since first exposure. Not a diagnosis.",
-      "reasonHi": "प्राथमिकता — संचयी सिलिका जोखिम 8.00 mg/m³·वर्ष, मुख्यतः सूखी ड्रिलिंग के 10 वर्षों से (कुल का 35.0%)। पहले जोखिम के 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
+      "reasonEn": "Priority — 8.00 mg/m³·years cumulative silica exposure, mainly 10 years of dry drilling (35.0% of total). Not a diagnosis.",
+      "reasonHi": "प्राथमिकता — संचयी सिलिका जोखिम 8.00 mg/m³·वर्ष, मुख्यतः सूखी ड्रिलिंग के 10 वर्षों से (कुल का 35.0%)। यह निदान नहीं है।",
       "modelVersion": "risk-model-0.1.0",
       "jemVersion": "jem-raj-sandstone-0.1.0",
       "confidence": "provisional",
@@ -607,15 +603,12 @@
       "cumulativeExposure": 2.59,
       "peakIntensity": 0.14,
       "yearsSinceFirstExposure": 17,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 3,
-      "tier": 4,
-      "escalations": [
-        {
-          "code": "LATENCY",
-          "applied": true
-        }
-      ],
-      "rescreenMonths": 12,
+      "tier": 3,
+      "escalations": [],
+      "rescreenMonths": 24,
       "topContributors": [
         {
           "taskCode": "DRESS",
@@ -625,8 +618,8 @@
           "calendarYears": 18
         }
       ],
-      "reasonEn": "Priority — 2.59 mg/m³·years cumulative silica exposure, mainly 18 years of stone dressing (100.0% of total). Escalated for 15+ years since first exposure. Not a diagnosis.",
-      "reasonHi": "प्राथमिकता — संचयी सिलिका जोखिम 2.59 mg/m³·वर्ष, मुख्यतः पत्थर घड़ाई के 18 वर्षों से (कुल का 100.0%)। पहले जोखिम के 15+ वर्ष के कारण श्रेणी बढ़ाई गई। यह निदान नहीं है।",
+      "reasonEn": "High — 2.59 mg/m³·years cumulative silica exposure, mainly 18 years of stone dressing (100.0% of total). Not a diagnosis.",
+      "reasonHi": "उच्च — संचयी सिलिका जोखिम 2.59 mg/m³·वर्ष, मुख्यतः पत्थर घड़ाई के 18 वर्षों से (कुल का 100.0%)। यह निदान नहीं है।",
       "modelVersion": "risk-model-0.1.0",
       "jemVersion": "jem-raj-sandstone-0.1.0",
       "confidence": "provisional",
@@ -640,6 +633,8 @@
       "cumulativeExposure": 0,
       "peakIntensity": 0.02,
       "yearsSinceFirstExposure": 0,
+      "yearsSinceLastExposure": 0,
+      "exposureEnded": false,
       "baseTier": 1,
       "tier": 1,
       "escalations": [],

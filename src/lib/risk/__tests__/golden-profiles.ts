@@ -123,8 +123,9 @@ export const GOLDEN_PROFILES: readonly GoldenProfile[] = [
 
   profile(
     'P14',
-    'Every escalation fires: current smoker, prior TB, thirty years since first exposure',
-    [seg({ taskCode: 'CUT_DRY', startYear: 1996, endYear: 2026 })],
+    'Every escalation fires: left dusty work in 2015, current smoker, prior TB',
+    // Must have ENDED exposure — LATENCY no longer fires on tenure alone.
+    [seg({ taskCode: 'CUT_DRY', startYear: 1996, endYear: 2015 })],
     { smokingStatus: 'current', priorTB: true },
   ),
 

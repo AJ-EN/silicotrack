@@ -59,17 +59,28 @@ const RESCREEN_MONTHS: Readonly<Record<Tier, number>> = {
 };
 
 /**
- * RISK_MODEL.md §7.2. Buchanan et al. 2003 supports a separate peak term but
- * places its inflection at 2.0 mg/m³ — four times this value. 0.5 is chosen on
- * regulatory rather than epidemiological grounds (~3.3× the Indian DGMS limit
- * of 0.15, ~10× OSHA/NIOSH). Against a JEM centred on 0.12, Buchanan's 2.0
- * would flag nobody and the rule would be inert.
+ * PEAK INTENSITY IS NOT MODELLED AT v1.
  *
- * This is the model's most vulnerable single number.
+ * There was a `peakIntensity >= 0.5` escalation here. It fired for zero of 500
+ * workers, because the matrix ceiling is 0.28 × 1.2 = 0.336 — the threshold sat
+ * above anything the JEM could produce. It has been deleted rather than
+ * retuned: a rule that appears in the specification and never fires implies a
+ * safeguard that does not exist.
+ *
+ * `peakIntensity` is still COMPUTED and REPORTED, because a reviewer asking
+ * "what was this worker's worst exposure concentration" deserves an answer, and
+ * because Buchanan et al. 2003 is good evidence that peak matters independently
+ * of cumulative dose. It simply does not drive a tier today. Reinstating it
+ * needs a sourced JEM first, not a lower number. See RISK_MODEL.md §7.2.
  */
-const PEAK_INTENSITY_THRESHOLD = 0.5;
 
-/** Set at the observed tenure floor among silicotic Jodhpur workers (Rajavel et al. 2020). */
+/**
+ * Latency threshold, in years since first exposure.
+ *
+ * Set at the observed tenure floor among silicotic Jodhpur workers
+ * (Rajavel et al. 2020). See the cessation condition below — this threshold
+ * alone is NOT sufficient to fire the rule.
+ */
 const LATENCY_THRESHOLD_YEARS = 15;
 
 /** Normalisation basis for the duration term: an 8-hour day, 12-month year. */
@@ -111,7 +122,6 @@ export const ESCALATION_MAX_STEPS = 2;
  */
 export const ESCALATION_PRECEDENCE: readonly EscalationCode[] = [
   'PRIOR_TB',
-  'PEAK_INTENSITY',
   'LATENCY',
   'CURRENT_SMOKER',
 ];
@@ -275,15 +285,36 @@ export function tierForExposure(cumulativeExposure: number): Tier {
 
 function satisfiedEscalations(
   input: RiskEngineInput,
-  peakIntensity: number,
   yearsSinceFirstExposure: number,
+  exposureEnded: boolean,
 ): EscalationCode[] {
   const fired = new Set<EscalationCode>();
 
   if (input.worker.priorTB) fired.add('PRIOR_TB');
-  if (peakIntensity >= PEAK_INTENSITY_THRESHOLD) fired.add('PEAK_INTENSITY');
-  if (yearsSinceFirstExposure >= LATENCY_THRESHOLD_YEARS) fired.add('LATENCY');
   if (input.worker.smokingStatus === 'current') fired.add('CURRENT_SMOKER');
+
+  /**
+   * LATENCY — post-cessation progression.
+   *
+   * Requires BOTH a long interval since first exposure AND that exposure has
+   * stopped.
+   *
+   * The cessation condition is the whole point of the rule. Long service on
+   * its own is not new information: it is already in cumulative exposure,
+   * which is literally intensity × duration. Firing on tenure alone counted
+   * the same fact twice and let a worker's years push their tier up alongside
+   * the exposure those same years produced.
+   *
+   * What tenure does NOT capture is that silicosis progresses after exposure
+   * ends. For a worker still in the quarry, CE keeps rising and the model
+   * keeps tracking them. For a worker who left, CE is frozen at whatever it
+   * reached — but the disease is not. That worker is the one whose exposure
+   * figure understates their risk, and that is the only case this rule now
+   * covers.
+   */
+  if (exposureEnded && yearsSinceFirstExposure >= LATENCY_THRESHOLD_YEARS) {
+    fired.add('LATENCY');
+  }
 
   return ESCALATION_PRECEDENCE.filter((code) => fired.has(code));
 }
@@ -303,19 +334,33 @@ export function assessRisk(input: RiskEngineInput): RiskResult {
   let rawCumulative = 0;
   let rawPeak = 0;
   let firstYear: number | null = null;
+  let lastYear: number | null = null;
 
   for (const segment of resolved) {
     rawCumulative += segment.intensity * segment.durationYears;
     // Peak is a property of concentration, not of dose, so duration is
     // irrelevant here. A short stint of dry drilling still sets the peak.
+    // Reported for review; no longer drives a tier. See the note above.
     rawPeak = Math.max(rawPeak, segment.intensity);
     firstYear =
       firstYear === null ? segment.startYear : Math.min(firstYear, segment.startYear);
+    lastYear = lastYear === null ? segment.endYear : Math.max(lastYear, segment.endYear);
   }
 
   const cumulativeExposure = round2(rawCumulative);
   const peakIntensity = round2(rawPeak);
   const yearsSinceFirstExposure = firstYear === null ? 0 : referenceYear - firstYear;
+  const yearsSinceLastExposure = lastYear === null ? 0 : referenceYear - lastYear;
+
+  /**
+   * Has the worker left dusty work?
+   *
+   * `resolveSegment` clamps an ongoing segment (`endYear: null`) to the
+   * reference year, so any segment still running this year makes this false.
+   * A worker with no segments at all has not "ended" exposure — they have no
+   * recorded exposure, which is a different thing and is flagged separately.
+   */
+  const exposureEnded = lastYear !== null && lastYear < referenceYear;
 
   // --- Contributions, aggregated by task ---
   interface TaskTotals {
@@ -360,7 +405,7 @@ export function assessRisk(input: RiskEngineInput): RiskResult {
   // --- Tiering ---
   const baseTier = tierForExposure(cumulativeExposure);
 
-  const fired = satisfiedEscalations(input, peakIntensity, yearsSinceFirstExposure);
+  const fired = satisfiedEscalations(input, yearsSinceFirstExposure, exposureEnded);
   const appliedSteps = Math.min(fired.length, ESCALATION_MAX_STEPS);
   const escalations: EscalationReason[] = fired.map((code, index) => ({
     code,
@@ -385,6 +430,8 @@ export function assessRisk(input: RiskEngineInput): RiskResult {
     cumulativeExposure,
     peakIntensity,
     yearsSinceFirstExposure,
+    yearsSinceLastExposure,
+    exposureEnded,
     baseTier,
     tier,
     escalations,
