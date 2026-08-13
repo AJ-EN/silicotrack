@@ -266,6 +266,58 @@ export const STRINGS = {
   },
   'stage.LOST_TO_FOLLOWUP': { hi: 'संपर्क टूट गया', en: 'Lost to follow-up' },
 
+  // --- Dashboard ---
+  'dash.title': { hi: 'ज़िला निगरानी', en: 'District surveillance' },
+  'dash.subtitle': {
+    hi: 'जोखिम वितरण, पहचान श्रृंखला और पोर्टल चरण',
+    en: 'Exposure distribution, detection cascade, and portal stages',
+  },
+  'dash.registered': { hi: 'पंजीकृत', en: 'Registered' },
+  'dash.assessed': { hi: 'मूल्यांकित', en: 'Assessed' },
+  'dash.incomplete': { hi: 'अधूरे साक्षात्कार', en: 'Incomplete interviews' },
+  'dash.invited': { hi: 'आमंत्रित', en: 'Invited' },
+  'dash.attended': { hi: 'उपस्थित', en: 'Attended' },
+  'dash.abnormal': { hi: 'रेडियोग्राफ़ में निष्कर्ष', en: 'Radiographic findings' },
+  'dash.flagged': { hi: 'आगे की समीक्षा के लिए', en: 'Flagged for review' },
+  'dash.referred': { hi: 'रेफर किए गए', en: 'Referred' },
+  'dash.certifiedCount': { hi: 'प्रमाणित', en: 'Certified' },
+  'dash.tierDistribution': { hi: 'जोखिम श्रेणी वितरण', en: 'Exposure tier distribution' },
+  'dash.cascade': { hi: 'पहचान श्रृंखला', en: 'Detection cascade' },
+  'dash.byDistrict': { hi: 'ज़िलेवार', en: 'By district' },
+  'dash.district': { hi: 'ज़िला', en: 'District' },
+  'dash.workers': { hi: 'श्रमिक', en: 'Workers' },
+  'dash.priority': { hi: 'श्रेणी 4', en: 'Tier 4' },
+
+  // The headline metric.
+  'dash.symptomGate': { hi: 'लक्षण-आधारित छँटनी का असर', en: 'What the symptom gate costs' },
+  'dash.abnormalFindings': {
+    hi: 'ILO श्रेणी 1+ रेडियोग्राफ़',
+    en: 'Radiographs at ILO category 1+',
+  },
+  'dash.discarded': {
+    hi: 'इनमें से लक्षण न होने पर अस्वीकृत',
+    en: 'Of those, rejected for having no symptoms',
+  },
+  'dash.discardRate': { hi: 'अस्वीकृति दर', en: 'Discard rate' },
+  'dash.discardedHighTier': {
+    hi: 'इनमें से श्रेणी 3+ जोखिम वाले',
+    en: 'Of those, already at exposure tier 3+',
+  },
+  'dash.stateComparator': {
+    hi: 'राज्य का प्रकाशित आँकड़ा: 21,871 आवेदनों में से 11,288 (57.6%) CHC स्तर पर लक्षण न होने के कारण अस्वीकृत।',
+    en: "State's published figure: 11,288 of 21,871 applications (57.6%) rejected at CHC level for absent symptoms.",
+  },
+  'dash.symptomGateNote': {
+    hi: 'यह प्रणाली लक्षण नहीं पूछती। "लक्षण नहीं" का निर्धारण राज्य ने स्वयं CHC पर किया — यह उनके ही आकलन पर उनकी ही कसौटी की जाँच है।',
+    en: 'This system does not ask about symptoms. The "no symptoms" determination is the state\'s own, recorded at CHC — this measures their criterion against their own assessment.',
+  },
+  'dash.iloCaveat': {
+    hi: 'ILO श्रेणी 0 का अर्थ रोग-मुक्त नहीं है। HRCT पर श्रेणी 0 वाले 18% श्रमिकों में सिलिकोसिस पाया गया (Hoy et al. 2024)।',
+    en: 'ILO category 0 does not mean disease-free. 18% of workers read as category 0 had silicosis on HRCT (Hoy et al. 2024).',
+  },
+  'dash.portalFunnel': { hi: 'पोर्टल चरण', en: 'Portal stages' },
+  'dash.of': { hi: 'में से', en: 'of' },
+
   // --- Escalation reasons ---
   'esc.PRIOR_TB': { hi: 'पहले टीबी हुई थी', en: 'Prior TB' },
   'esc.LATENCY': {
