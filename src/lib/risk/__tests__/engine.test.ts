@@ -283,11 +283,44 @@ describe('malformed segments are refused, never scored negative', () => {
 });
 
 describe('control modifiers', () => {
-  it('skips m_method when the task code already encodes wet/dry', () => {
-    // Applying both halves DRILL_WET a second time — a silent 2× error in the
-    // under-triage direction. See JEM_SOURCES.md §5.1.
+  it('does not double-count wet suppression on a methodEncoded task', () => {
+    // THE DOUBLE-COUNTING GUARD. See JEM_SOURCES.md §5.1.
+    //
+    // DRILL_WET's intensity ALREADY reflects water suppression. Applying
+    // m_method on top would halve it a second time — 0.05 → 0.025 — a silent
+    // 2× error in the UNDER-triage direction, on exactly the workers this
+    // system exists to find.
     const wetTask = segment({ taskCode: 'DRILL_WET', startYear: 2026, method: 'wet' });
     expect(controlModifier(wetTask, 'DRILL_WET')).toBe(1);
+    expect(controlModifier(wetTask, 'DRILL_WET')).not.toBe(CONTROL_MODIFIERS.method.wet);
+  });
+
+  it('scores a methodEncoded task identically whatever the method field says', () => {
+    // The stronger form of the same guard, asserted on cumulative exposure
+    // rather than on the modifier: a full year of DRILL_WET must come out at
+    // exactly the JEM intensity, never half of it, and the free-text method
+    // answer must not move the number at all.
+    const year = { startYear: 2026, endYear: 2026 } as const;
+    const asWet = assessRisk(
+      input([segment({ taskCode: 'DRILL_WET', method: 'wet', ...year })]),
+    );
+    const asDry = assessRisk(
+      input([segment({ taskCode: 'DRILL_WET', method: 'dry', ...year })]),
+    );
+
+    expect(asWet.cumulativeExposure).toBe(JEM.DRILL_WET.intensityMgM3);
+    expect(asWet.cumulativeExposure).toBe(asDry.cumulativeExposure);
+  });
+
+  it('leaves every methodEncoded task in the JEM covered by the guard', () => {
+    // If a fifth method-encoded code is ever added, this fails until the
+    // guard is extended to it rather than silently under-scoring that task.
+    for (const code of JEM_TASK_ORDER.filter((task) => JEM[task].methodEncoded)) {
+      for (const method of ['wet', 'dry'] as const) {
+        const seg = segment({ taskCode: code, startYear: 2026, method });
+        expect(controlModifier(seg, code)).toBe(1);
+      }
+    }
   });
 
   it('applies m_method for method-neutral tasks', () => {

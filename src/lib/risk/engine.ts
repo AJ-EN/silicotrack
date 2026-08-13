@@ -109,7 +109,7 @@ export const ESCALATION_MAX_STEPS = 2;
  * evidence rule — current smoking, where the literature is genuinely mixed — is
  * the first to be dropped when the cap binds. Also makes output deterministic.
  */
-const ESCALATION_PRECEDENCE: readonly EscalationCode[] = [
+export const ESCALATION_PRECEDENCE: readonly EscalationCode[] = [
   'PRIOR_TB',
   'PEAK_INTENSITY',
   'LATENCY',

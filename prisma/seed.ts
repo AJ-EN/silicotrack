@@ -26,7 +26,12 @@
 import 'dotenv/config';
 
 import { prisma } from '../src/lib/db/client';
-import { assessRisk } from '../src/lib/risk/engine';
+import { ESCALATION_PRECEDENCE, assessRisk } from '../src/lib/risk/engine';
+import {
+  CLINICAL_STATUSES,
+  isCampEligible,
+  type ClinicalStatus,
+} from '../src/lib/camp/eligibility';
 import type {
   ExposureSegmentInput,
   RiskResult,
@@ -242,6 +247,8 @@ interface GeneratedWorker {
   phone: string | null;
   smokingStatus: SmokingStatus;
   priorTB: boolean;
+  /** Mutable: set to a baseline here, then advanced by planOperations. */
+  clinicalStatus: ClinicalStatus;
   createdBy: string;
   createdAt: string;
   segments: (ExposureSegmentInput & { material: string; siteName: string | null })[];
@@ -352,6 +359,21 @@ function generateWorker(index: number, district: DistrictProfile): GeneratedWork
   const worker: WorkerRiskFacts = { smokingStatus, priorTB };
   const result = assessRisk({ segments, worker, referenceDate: REFERENCE_DATE });
 
+  /**
+   * Baseline clinical status, representing history that predates SilicoTrack.
+   *
+   * Rajasthan's pipeline has certified thousands of workers already, so a
+   * realistic registry is not all-UNKNOWN on day one. Weighted by tenure:
+   * long-exposed workers are likeliest to have already been through the state
+   * pipeline. Assigned BEFORE camp planning, so the CERTIFIED exclusion has
+   * something real to exclude.
+   */
+  const alreadyKnown = totalTenure >= 20 ? 0.09 : totalTenure >= 10 ? 0.04 : 0.01;
+  let clinicalStatus: ClinicalStatus = 'UNKNOWN';
+  if (chance(alreadyKnown)) {
+    clinicalStatus = chance(0.35) ? 'UNDER_TREATMENT' : 'CERTIFIED';
+  }
+
   const firstName = sex === 'male' ? pick(MALE_FIRST) : pick(FEMALE_FIRST);
   const serial = String(index + 1).padStart(5, '0');
 
@@ -368,6 +390,7 @@ function generateWorker(index: number, district: DistrictProfile): GeneratedWork
     phone: chance(0.82) ? `+91 60000 ${serial}` : null,
     smokingStatus,
     priorTB,
+    clinicalStatus,
     createdBy: `ASHA-${district.code}-${String(randInt(1, 24)).padStart(2, '0')}`,
     createdAt: isoInstant(randInt(30, 400), index),
     segments,
@@ -482,7 +505,14 @@ function planOperations(workers: GeneratedWorker[]): Plan {
       // This is the camp planner's job in miniature: rank the block's workers
       // by tier, then by cumulative exposure, and invite up to capacity.
       const candidates = workers
-        .filter((w) => w.district === district.name && w.block === block)
+        .filter(
+          (w) =>
+            w.district === district.name &&
+            w.block === block &&
+            // Already certified: found, compensated, and not what a
+            // case-finding camp is for. See lib/camp/eligibility.ts.
+            isCampEligible(w.clinicalStatus),
+        )
         .sort(
           (a, b) =>
             b.result.tier - a.result.tier ||
@@ -529,7 +559,14 @@ function planOperations(workers: GeneratedWorker[]): Plan {
               : '0/0',
         });
 
-        if (outcome === 'NORMAL') return;
+        // A clean film advances the clinical record, but never downgrades
+        // someone already known to the pipeline.
+        if (outcome === 'NORMAL') {
+          if (worker.clinicalStatus === 'UNKNOWN') {
+            worker.clinicalStatus = 'SCREENED_NEGATIVE';
+          }
+          return;
+        }
 
         // --- Referral into the state pipeline ---
         const referralId = `REF-${String(++referralIndex).padStart(5, '0')}`;
@@ -620,6 +657,22 @@ function planOperations(workers: GeneratedWorker[]): Plan {
           lastContactAt: isoInstant(-cursorOffset, referralIndex),
           daysInStage,
         });
+
+        /**
+         * The referral outcome is what actually moves a person's clinical
+         * standing.
+         *
+         * REJECTED_NO_SYMPTOMS leaves them SUSPECTED, not negative. An
+         * abnormal film was read and the rejection was made on symptom
+         * grounds, not radiological ones. That gap between "has radiological
+         * findings" and "was rejected for having no symptoms" is the project's
+         * entire argument, and the data model has to be able to express it.
+         */
+        if (status === 'CERTIFIED' || status === 'DISBURSED') {
+          worker.clinicalStatus = chance(0.45) ? 'UNDER_TREATMENT' : 'CERTIFIED';
+        } else {
+          worker.clinicalStatus = 'SUSPECTED';
+        }
       });
     }
   }
@@ -678,6 +731,42 @@ function report(workers: GeneratedWorker[], plan: Plan): void {
     console.log(`  Tier ${tier}${String(count).padStart(6)}  ${pct(count)}${arrow}`);
   }
 
+  // --- Per-rule hit rates -------------------------------------------------
+  // Which rule is actually doing the work. `fired` is how often the condition
+  // held; `applied` is how often it claimed one of the limited escalation
+  // steps; `sole` is how often it was the ONLY rule firing for that worker,
+  // which is the closest thing to that rule's marginal effect on the cohort.
+  console.log('\nEscalation rules — individual cohort hit-rate:');
+  console.log(`  ${'rule'.padEnd(16)}${'fired'.padStart(14)}${'applied'.padStart(14)}${'sole trigger'.padStart(16)}`);
+
+  for (const code of ESCALATION_PRECEDENCE) {
+    const fired = workers.filter((w) =>
+      w.result.escalations.some((e) => e.code === code),
+    ).length;
+    const applied = workers.filter((w) =>
+      w.result.escalations.some((e) => e.code === code && e.applied),
+    ).length;
+    const sole = workers.filter(
+      (w) => w.result.escalations.length === 1 && w.result.escalations[0]?.code === code,
+    ).length;
+
+    const cell = (n: number): string =>
+      `${String(n).padStart(5)} ${`${((n / total) * 100).toFixed(1)}%`.padStart(7)}`;
+
+    console.log(
+      `  ${code.padEnd(16)}${cell(fired).padStart(14)}${cell(applied).padStart(14)}${cell(sole).padStart(16)}`,
+    );
+  }
+
+  // How often the +2 step cap actually binds.
+  console.log('\nRules firing per worker:');
+  for (let count = 0; count <= ESCALATION_PRECEDENCE.length; count++) {
+    const n = workers.filter((w) => w.result.escalations.length === count).length;
+    if (n === 0) continue;
+    const capped = count > 2 ? '  ← capped, weakest rule dropped' : '';
+    console.log(`  ${count} rule(s) ${String(n).padStart(4)}  ${pct(n)}${capped}`);
+  }
+
   const escalated = workers.filter((w) => w.result.tier > w.result.baseTier).length;
   const incomplete = workers.filter((w) => w.result.insufficientData).length;
   const exposures = workers.map((w) => w.result.cumulativeExposure).sort((a, b) => a - b);
@@ -699,6 +788,15 @@ function report(workers: GeneratedWorker[], plan: Plan): void {
         `tier 4: ${String(priority).padStart(3)} (${((priority / inDistrict.length) * 100).toFixed(1)}%)`,
     );
   }
+
+  console.log('\nClinical status:');
+  for (const status of CLINICAL_STATUSES) {
+    const n = workers.filter((w) => w.clinicalStatus === status).length;
+    const excluded = isCampEligible(status) ? '' : '  ← excluded from camps';
+    console.log(`  ${status.padEnd(18)}${String(n).padStart(4)}  ${pct(n)}${excluded}`);
+  }
+  const ineligible = workers.filter((w) => !isCampEligible(w.clinicalStatus)).length;
+  console.log(`  camp-ineligible      ${String(ineligible).padStart(4)}  ${pct(ineligible)}`);
 
   console.log('\nOperational records:');
   console.log(`  camps              ${plan.camps.length}`);
@@ -756,6 +854,7 @@ async function write(workers: GeneratedWorker[], plan: Plan): Promise<void> {
         phone: w.phone,
         smokingStatus: w.smokingStatus,
         priorTB: w.priorTB,
+        clinicalStatus: w.clinicalStatus,
         createdBy: w.createdBy,
         createdAt: w.createdAt,
       })),
@@ -818,7 +917,36 @@ async function write(workers: GeneratedWorker[], plan: Plan): Promise<void> {
 
 async function main(): Promise<void> {
   const workers = buildCohort();
+
+  // Statuses at planning time. planOperations advances them as screenings and
+  // referrals resolve, so the eligibility rule has to be checked against what
+  // was known BEFORE the camps ran — a worker certified BY a camp is
+  // legitimately on that camp's list.
+  const statusAtPlanning = new Map(workers.map((w) => [w.workerId, w.clinicalStatus]));
+
   const plan = planOperations(workers);
+
+  // Hard invariant, not a report line. If the eligibility filter ever
+  // regresses, the seed must fail rather than quietly produce a cohort whose
+  // camp lists contain people who were already certified.
+  const wronglyInvited = plan.invites.filter((invite) => {
+    const status = statusAtPlanning.get(invite.workerId);
+    return status !== undefined && !isCampEligible(status);
+  });
+  if (wronglyInvited.length > 0) {
+    throw new Error(
+      `camp eligibility violated: ${wronglyInvited.length} invitation(s) issued to ` +
+        'workers who were already CERTIFIED at planning time',
+    );
+  }
+
+  const excludedAtPlanning = [...statusAtPlanning.values()].filter(
+    (status) => !isCampEligible(status),
+  ).length;
+  console.log(
+    `\nCamp eligibility: ${excludedAtPlanning} worker(s) were CERTIFIED before planning ` +
+      'and were excluded from every camp list.',
+  );
 
   report(workers, plan);
 

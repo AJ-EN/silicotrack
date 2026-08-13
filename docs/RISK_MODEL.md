@@ -272,6 +272,25 @@ The +2 sub-cap is the substantive choice. Without it, a worker with `CE = 0.3` w
 
 > **This is a decision the project owner should confirm before the golden-file tests are frozen.** It materially changes the cohort tier distribution and therefore every camp list the system produces.
 
+#### Measured effect on the 500-worker synthetic cohort
+
+Printed by `npm run seed -- --dry-run`. `fired` = condition held; `applied` = claimed one of the limited escalation steps; `sole` = the only rule firing for that worker, which is the closest available read on a rule's marginal effect.
+
+| Rule | fired | applied | sole trigger |
+|---|---|---|---|
+| `PRIOR_TB` | 45 (9.0%) | 45 (9.0%) | 13 (2.6%) |
+| `PEAK_INTENSITY` | **0 (0.0%)** | 0 (0.0%) | 0 (0.0%) |
+| `LATENCY` | **267 (53.4%)** | 267 (53.4%) | **187 (37.4%)** |
+| `CURRENT_SMOKER` | 117 (23.4%) | 112 (22.4%) | 56 (11.2%) |
+
+Three things follow, and they sharpen the §7.1 decision rather than settling it.
+
+**`LATENCY` is the escalation model.** It fires for over half the cohort and is the sole trigger for 37.4% — more than the other three rules combined. Any argument about escalation policy is, in practice, an argument about this one rule. It is also the rule with the weakest threshold justification (§7.2: 15 years is a tenure floor observed in one cross-sectional study, not a dose-response inflection).
+
+**`PEAK_INTENSITY` fires for nobody**, confirming on a realistic cohort what §7.2 establishes arithmetically: the threshold sits above the matrix ceiling. It is not a weak rule, it is an absent one.
+
+**The +2 cap is nearly irrelevant; the second step is not.** Only 5 workers (1.0%) fire three rules and hit the cap. But 79 (15.8%) fire exactly two and take a full +2. So lowering `ESCALATION_MAX_STEPS` to 1 would not be "tightening an edge case" — it would change the tier of 84 workers, about one in six. The earlier framing of this as a cap question was wrong: it is a question about whether a second escalation should count at all.
+
 ### 7.2 The rules
 
 | Rule | Evidence | Grade |

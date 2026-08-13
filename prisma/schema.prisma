@@ -65,6 +65,22 @@ model Worker {
   /// contain TB, so this is mechanistically linked, not incidental.
   priorTB       Boolean
 
+  /// Where this person stands in the CLINICAL pathway, as distinct from their
+  /// exposure tier. One of:
+  ///
+  ///   UNKNOWN | SCREENED_NEGATIVE | SUSPECTED | CERTIFIED | UNDER_TREATMENT
+  ///
+  /// Owned by the screening and referral pipeline, NEVER by the field
+  /// interview. An ASHA worker does not certify anyone — the District
+  /// Pneumoconiosis Board does — so a re-sync from the field must not be able
+  /// to reset a certified worker to UNKNOWN. The sync payload deliberately
+  /// omits this field for that reason.
+  ///
+  /// CERTIFIED workers are excluded from camp eligibility: they have already
+  /// been found, and a case-finding camp seat spent on them is a seat not
+  /// spent on someone undetected. See lib/camp/eligibility.ts.
+  clinicalStatus String @default("UNKNOWN")
+
   /// Role identifier of the health worker who registered this person.
   /// Demo builds use the role switcher; there is no real auth (CLAUDE.md §10).
   createdBy String
@@ -79,6 +95,8 @@ model Worker {
 
   @@index([district, block])
   @@index([district, village])
+  /// Camp planning filters by block and clinical status together.
+  @@index([district, block, clinicalStatus])
 }
 
 /// One entry in a worker's exposure ledger. A worker has MANY of these.

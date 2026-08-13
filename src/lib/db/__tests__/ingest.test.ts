@@ -151,6 +151,32 @@ describe('a genuine re-interview supersedes rather than overwrites', () => {
     expect(all[1]?.tier).toBe(4);
   });
 
+  it('never lets a field re-sync reset clinical status', async () => {
+    // An ASHA worker does not certify anyone — the District Pneumoconiosis
+    // Board does. If a later interview from the field could write this column,
+    // a certified worker would silently drop back to UNKNOWN, become camp
+    // eligible again, and take a seat from someone undetected.
+    //
+    // The protection is that the sync payload has no clinicalStatus field at
+    // all. This test exists because that is an easy thing to "helpfully" add.
+    await ingestSubmission(prisma, submission());
+    await prisma.worker.update({
+      where: { workerId: 'W-test-0001' },
+      data: { clinicalStatus: 'CERTIFIED' },
+    });
+
+    await ingestSubmission(prisma, submission({ capturedAt: '2026-09-01T08:00:00Z' }));
+
+    const worker = await prisma.worker.findUnique({ where: { workerId: 'W-test-0001' } });
+    expect(worker?.clinicalStatus).toBe('CERTIFIED');
+  });
+
+  it('defaults a newly registered worker to UNKNOWN', async () => {
+    await ingestSubmission(prisma, submission());
+    const worker = await prisma.worker.findUnique({ where: { workerId: 'W-test-0001' } });
+    expect(worker?.clinicalStatus).toBe('UNKNOWN');
+  });
+
   it('preserves who registered the worker and when', async () => {
     await ingestSubmission(prisma, submission());
     await ingestSubmission(
