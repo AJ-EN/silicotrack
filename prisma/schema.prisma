@@ -1,0 +1,327 @@
+// SilicoTrack data model — CLAUDE.md §5.
+//
+// Prototype runs on SQLite. The production path is Postgres on the Rajasthan
+// State Data Centre, so everything here stays portable:
+//
+//   * NO Prisma enums.        SQLite does not support them. Enum-like columns
+//                             are String, with the permitted values documented
+//                             on the field and enforced by Zod at every
+//                             boundary (CLAUDE.md §9).
+//   * NO scalar lists.        SQLite does not support them. The `[]` fields in
+//                             the brief become either a relation table (where
+//                             the list is queryable and drives a feature) or a
+//                             JSON string (where it is an opaque snapshot).
+//   * NO native-type or       Nothing here needs rewriting to move to Postgres
+//     SQLite-only defaults.   beyond changing the datasource provider.
+//
+// DATES ARE ISO 8601 STRINGS, NOT DateTime (CLAUDE.md §9).
+//
+//   Calendar days   -> "YYYY-MM-DD"          (a camp is held on a day, not at
+//                                             an instant; DateTime would shift
+//                                             it across timezones)
+//   Instants        -> "YYYY-MM-DDTHH:MM:SSZ" (always UTC, always suffixed Z)
+//
+// ISO 8601 sorts lexicographically in the same order it sorts chronologically,
+// so range queries and ORDER BY still work on both engines. There is no
+// @default(now()) anywhere by design: this is an offline-first system, so the
+// FIELD DEVICE owns the timestamp, not the database server. A record created in
+// a quarry with no signal and synced three days later must carry the time it
+// was actually taken.
+//
+// ALL DATA IN THIS DATABASE IS SYNTHETIC. See prisma/seed.ts.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+/// A person in the exposure registry.
+///
+/// Person-linked, not employer-linked, so the record survives migration between
+/// unregistered quarries. There is deliberately NO Aadhaar or Jan Aadhaar field
+/// (CLAUDE.md §2.5) — `workerId` is opaque. The production design links via Jan
+/// Aadhaar; the prototype does not implement it.
+model Worker {
+  /// Opaque application-issued identifier. Never a government number.
+  workerId String @id
+
+  name     String
+  age      Int
+  /// "male" | "female" | "other"
+  sex      String
+  district String
+  block    String
+  village  String
+  /// Optional: many workers share a household phone or have none.
+  phone    String?
+
+  /// "never" | "former" | "current" — feeds the CURRENT_SMOKER escalation.
+  smokingStatus String
+  /// Feeds the PRIOR_TB escalation. Silica disables the macrophages that
+  /// contain TB, so this is mechanistically linked, not incidental.
+  priorTB       Boolean
+
+  /// Role identifier of the health worker who registered this person.
+  /// Demo builds use the role switcher; there is no real auth (CLAUDE.md §10).
+  createdBy String
+  /// ISO 8601 instant, set by the field device at capture time.
+  createdAt String
+
+  segments    ExposureSegment[]
+  assessments RiskAssessment[]
+  screenings  ScreeningEvent[]
+  referrals   Referral[]
+  campInvites CampInvite[]
+
+  @@index([district, block])
+  @@index([district, village])
+}
+
+/// One entry in a worker's exposure ledger. A worker has MANY of these.
+///
+/// This is the ledger the entire risk model reads. Each row is one job held for
+/// one span of years, with the controls that were in place during it.
+model ExposureSegment {
+  id       String @id
+  workerId String
+  worker   Worker @relation(fields: [workerId], references: [workerId], onDelete: Cascade)
+
+  /// JEM task code, e.g. "DRILL_DRY". Unrecognised codes resolve to OTHER
+  /// rather than throwing — dropping a segment would remove the worker from
+  /// the screening queue entirely. See lib/risk/jem.ts.
+  taskCode String
+  /// Free text: "sandstone", "granite", "quartzite". Recorded for future JEM
+  /// stratification; the v1 matrix does not read it.
+  material String
+
+  /// "wet" | "dry". Ignored for task codes that already encode the method
+  /// (DRILL_DRY / DRILL_WET / CUT_DRY / CUT_WET), otherwise suppression is
+  /// counted twice. See docs/JEM_SOURCES.md §5.1.
+  method    String
+  /// "open" | "enclosed"
+  enclosure String
+  /// "none" | "intermittent" | "consistent"
+  /// The weakest input in the whole interview: self-reported, in a sector with
+  /// no fit-testing. The control-product floor bounds how much damage it does.
+  ppeUse    String
+  /// "surface" | "underground"
+  siteType  String
+
+  startYear     Int
+  /// NULL means ongoing. Resolved to the engine's reference date, never to
+  /// wall-clock "now".
+  endYear       Int?
+  monthsPerYear Int
+  hoursPerDay   Int
+
+  /// Optional and often unknown: migrant workers frequently cannot name the
+  /// quarry, which is itself a documented compensation barrier.
+  siteName String?
+
+  @@index([workerId])
+  @@index([taskCode])
+}
+
+/// A computed risk result. Immutable once written.
+///
+/// Kept as history rather than overwritten, so that editing a JEM coefficient
+/// and recomputing the cohort is an auditable operation with a before and an
+/// after. That auditability is the design answer to the matrix being
+/// provisional (CLAUDE.md §7).
+model RiskAssessment {
+  id       String @id
+  workerId String
+  worker   Worker @relation(fields: [workerId], references: [workerId], onDelete: Cascade)
+
+  cumulativeExposure      Float
+  peakIntensity           Float
+  yearsSinceFirstExposure Int
+
+  /// Tier from cumulative exposure alone, before escalation.
+  baseTier Int
+  /// Final tier after escalation. Never lower than baseTier.
+  tier     Int
+
+  /// JSON array of { code, applied }, mirroring RiskResult.escalations.
+  /// An opaque snapshot of a computation, not a queryable dimension — the
+  /// dashboard reads tier, and parses this only for the detail panel.
+  /// On Postgres this becomes Json.
+  escalationsJson String
+
+  rescreenMonths Int
+
+  /// JSON array of { taskCode, contribution, percentOfTotal, years }.
+  /// Explainability is not optional: a health worker must be able to see WHY a
+  /// worker was flagged.
+  topContributorsJson String
+
+  reasonEn String
+  reasonHi String
+
+  /// True when the worker has no exposure segments at all. Without this an
+  /// unfinished interview is indistinguishable from a genuinely low-exposure
+  /// worker — both are CE 0, tier 1 — and incomplete interviews hide inside
+  /// the low-risk bucket. The UI must render these as "Interview incomplete".
+  insufficientData Boolean
+
+  modelVersion String
+  jemVersion   String
+  /// Hardcoded "provisional" until the model is validated. It is not.
+  confidence   String
+
+  /// ISO 8601 instant. The engine's reference date is passed in explicitly;
+  /// this records when the computation was run.
+  computedAt String
+
+  /// Set false when superseded by a recomputation. Lets the camp planner and
+  /// dashboard read one row per worker without a correlated subquery.
+  isCurrent Boolean
+
+  @@index([workerId, isCurrent])
+  @@index([tier, isCurrent])
+  @@index([computedAt])
+}
+
+/// A screening camp: one device, one place, one day.
+///
+/// Targets the ultraportable handheld X-ray units already deployed under NTEP.
+/// No new hardware, no new regulatory pathway.
+model Camp {
+  campId   String @id
+  district String
+  block    String
+  /// Calendar day, "YYYY-MM-DD".
+  date     String
+  /// Identifier of the handheld X-ray unit assigned to this camp.
+  deviceId String
+  /// Maximum workers the camp can screen in a day. The camp planner returns
+  /// the top N by risk tier within this bound.
+  capacity Int
+
+  invites    CampInvite[]
+  screenings ScreeningEvent[]
+
+  @@index([district, block, date])
+  @@index([date])
+}
+
+/// Join between Camp and Worker — the brief's `invitedWorkerIds[]` and
+/// `attendedWorkerIds[]` as one relation, because attendance is a property of
+/// an invitation and the gap between the two is a number worth reporting.
+model CampInvite {
+  id       String @id
+  campId   String
+  camp     Camp   @relation(fields: [campId], references: [campId], onDelete: Cascade)
+  workerId String
+  worker   Worker @relation(fields: [workerId], references: [workerId], onDelete: Cascade)
+
+  /// Position on the prioritised call list at the time of invitation, 1-based.
+  /// Frozen so that changing the model later does not rewrite history.
+  priorityRank Int
+  /// Tier at time of invitation. Denormalised for the same reason.
+  tierAtInvite Int
+
+  attended Boolean
+
+  @@unique([campId, workerId])
+  @@index([workerId])
+}
+
+/// A screening that actually happened.
+model ScreeningEvent {
+  id       String  @id
+  workerId String
+  worker   Worker  @relation(fields: [workerId], references: [workerId], onDelete: Cascade)
+  campId   String?
+  camp     Camp?   @relation(fields: [campId], references: [campId], onDelete: SetNull)
+
+  /// Calendar day, "YYYY-MM-DD".
+  date     String
+  /// "CXR_HANDHELD" | "CXR_STATIC" | "HRCT"
+  modality String
+  /// "NORMAL" | "ABNORMAL" | "INCONCLUSIVE" | "NOT_SCREENED"
+  outcome  String
+
+  /// Output of the deep-learning CXR application already deployed on the Raj
+  /// Silicosis Portal at DPB level. SilicoTrack routes cases INTO that system;
+  /// it does not read X-rays itself (CLAUDE.md §10). NULL when not run.
+  aiFlag          String?
+  /// ILO profusion category as read by a radiologist, e.g. "0/1", "1/1", "2/2".
+  /// NULL until read. The authority, not the AI flag.
+  radiologistRead String?
+
+  @@index([workerId])
+  @@index([campId])
+  @@index([date])
+}
+
+/// A referral into the state certification pipeline.
+///
+/// `status` mirrors the real Raj Silicosis portal stages exactly, so the
+/// mapping is honest and the drop-off measurement is comparable:
+///
+///   REGISTERED -> PRIMARY_CHECKUP -> RADIOGRAPHER -> RADIOLOGIST
+///   -> MO_APPROVAL -> BOARD -> CERTIFIED -> DISBURSED
+///
+/// Terminal states: REJECTED_NO_SYMPTOMS, REJECTED_POST_XRAY, LOST_TO_FOLLOWUP.
+///
+/// REJECTED_NO_SYMPTOMS is the state's single largest bucket — 57.6% of 21,871
+/// applications — and is the failure this whole project exists to address.
+model Referral {
+  id       String @id
+  workerId String
+  worker   Worker @relation(fields: [workerId], references: [workerId], onDelete: Cascade)
+
+  /// District Pneumoconiosis Board the worker was referred to. Sole
+  /// certification authority; SilicoTrack never certifies anything.
+  toBoard String
+
+  /// Current stage. One of the values documented above.
+  status String
+
+  /// Scheduled board slot, calendar day "YYYY-MM-DD". NULL until scheduled.
+  slotDate String?
+
+  /// ISO 8601 instant of last contact with the worker. Drives the stalled
+  /// -referral flag.
+  lastContactAt String?
+  /// Days spent in the current stage as of the last recompute. Denormalised so
+  /// the "stalled >14 days" query is a plain indexed filter rather than a
+  /// per-row date computation, which SQLite and Postgres express differently.
+  daysInStage   Int
+
+  stageHistory ReferralStageEvent[]
+
+  @@index([status])
+  @@index([status, daysInStage])
+  @@index([workerId])
+}
+
+/// One transition in a referral's life — the brief's `stageHistory[]`.
+///
+/// A relation rather than a JSON blob because measuring drop-off at each stage
+/// is a headline feature, and a headline feature should be a GROUP BY, not an
+/// application-side parse of 8,000 JSON strings. The state tracks these stages
+/// internally but does not report loss at each one.
+model ReferralStageEvent {
+  id         String   @id
+  referralId String
+  referral   Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  /// Stage entered. Same vocabulary as Referral.status.
+  stage               String
+  /// ISO 8601 instant the referral entered this stage.
+  enteredAt           String
+  /// Days spent in the PREVIOUS stage before this transition. NULL for the
+  /// first event in a referral.
+  daysInPreviousStage Int?
+  /// Optional free-text note, e.g. a documented rejection reason.
+  note                String?
+
+  @@index([referralId, enteredAt])
+  @@index([stage])
+}
