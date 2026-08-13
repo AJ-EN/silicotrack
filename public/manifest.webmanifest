@@ -1,0 +1,27 @@
+{
+  "name": "SilicoTrack — सिलिकोट्रैक",
+  "short_name": "SilicoTrack",
+  "description": "Exposure-based screening priority for silicosis case-finding. Unvalidated prototype, synthetic data.",
+  "start_url": "/field",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#1b2a3d",
+  "lang": "hi",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

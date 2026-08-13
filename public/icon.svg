@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="SilicoTrack">
+  <!-- Sandstone strata, not a medical cross. This is a dust-exposure tool. -->
+  <rect width="512" height="512" rx="96" fill="#1b2a3d"/>
+  <g fill="none" stroke="#ffffff" stroke-linecap="round">
+    <path d="M104 340h304" stroke-width="34" opacity="0.95"/>
+    <path d="M104 262h304" stroke-width="30" opacity="0.72"/>
+    <path d="M104 192h304" stroke-width="26" opacity="0.5"/>
+    <path d="M104 132h304" stroke-width="22" opacity="0.3"/>
+  </g>
+</svg>

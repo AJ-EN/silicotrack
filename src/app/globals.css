@@ -128,3 +128,110 @@
     @apply font-sans;
   }
 }
+/* ═══════════════════════════════════════════════════════════════════════════
+   SilicoTrack field tool
+   ═══════════════════════════════════════════════════════════════════════════
+
+   This is a government field tool, not a product landing page. It is used on a
+   cheap Android phone, held at arm's length, in direct Rajasthan sunlight, by
+   someone standing in a quarry. Every choice below follows from that.
+
+     - Maximum contrast. Pure white ground, near-black text. Mid-greys wash out
+       completely at 100k lux, so borders are dark and 2px, never subtle.
+     - Tap targets are 56px minimum. The user may be wearing work gloves.
+     - No decorative motion. Animation costs battery and reads as unserious in
+       a clinical context.
+     - Layout holds at 360px. That is the real device, not an edge case.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+@theme inline {
+  --color-tier-1: var(--tier-1);
+  --color-tier-1-ink: var(--tier-1-ink);
+  --color-tier-2: var(--tier-2);
+  --color-tier-2-ink: var(--tier-2-ink);
+  --color-tier-3: var(--tier-3);
+  --color-tier-3-ink: var(--tier-3-ink);
+  --color-tier-4: var(--tier-4);
+  --color-tier-4-ink: var(--tier-4-ink);
+  --color-field-rule: var(--field-rule);
+  --color-field-notice: var(--field-notice);
+}
+
+:root {
+  /* ── Risk tier scale ──────────────────────────────────────────────────────
+     SEQUENTIAL, single hue, light to dark. NOT a red/green traffic light.
+
+     A traffic light encodes good/bad and reads as a diagnosis — green would
+     say "you are fine", which this system is not entitled to say about anyone.
+     A sequential ramp encodes only magnitude: more exposure, darker band.
+     Tier is always accompanied by its text label, so the colour is never the
+     sole carrier of meaning.                                                */
+  --tier-1: oklch(0.94 0.012 240);
+  --tier-1-ink: oklch(0.24 0.03 240);
+  --tier-2: oklch(0.83 0.035 240);
+  --tier-2-ink: oklch(0.22 0.04 240);
+  --tier-3: oklch(0.55 0.065 240);
+  --tier-3-ink: oklch(0.99 0.005 240);
+  --tier-4: oklch(0.31 0.075 240);
+  --tier-4-ink: oklch(0.99 0.005 240);
+
+  /* Dark hairlines survive sunlight; oklch(0.922) does not. */
+  --field-rule: oklch(0.42 0 0);
+  /* Provisional / disclaimer panels: distinct from data, never alarming. */
+  --field-notice: oklch(0.96 0.02 85);
+}
+
+@layer base {
+  html {
+    /* Devanagari renders taller than Latin at the same nominal size. The
+       Devanagari face is listed first for the glyphs it owns; the Latin face
+       picks up everything else. */
+    font-family:
+      var(--font-noto-sans), var(--font-noto-devanagari), system-ui, sans-serif;
+    /* Prevents iOS Safari inflating text in landscape, which breaks the
+       360px layout. */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    /* Field data entry is never a place for a text-selection accident. */
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Respect the platform, but this UI has no motion to suppress anyway. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Minimum comfortable target for a gloved thumb.
+   Declared as a Tailwind v4 @utility rather than a component class so that
+   @apply below can reference it — v4 cannot @apply a plain component class. */
+@utility tap {
+  min-height: 3.5rem;
+}
+
+@layer components {
+
+  /* Inputs must look unmistakably like inputs in bright light: heavy rule,
+     generous padding, large type. */
+  .field-input {
+    @apply tap w-full rounded-md border-2 bg-white px-4 text-lg text-foreground;
+    border-color: var(--field-rule);
+  }
+
+  .field-input:focus-visible {
+    @apply outline-none ring-4;
+    --tw-ring-color: var(--tier-4);
+    border-color: var(--tier-4);
+  }
+
+  .field-label {
+    @apply mb-2 block text-base font-semibold text-foreground;
+  }
+}

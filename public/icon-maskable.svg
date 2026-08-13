@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="SilicoTrack">
+  <rect width="512" height="512" fill="#1b2a3d"/>
+  <g fill="none" stroke="#ffffff" stroke-linecap="round">
+    <path d="M146 330h220" stroke-width="30" opacity="0.95"/>
+    <path d="M146 266h220" stroke-width="26" opacity="0.72"/>
+    <path d="M146 208h220" stroke-width="22" opacity="0.5"/>
+    <path d="M146 158h220" stroke-width="18" opacity="0.3"/>
+  </g>
+</svg>
