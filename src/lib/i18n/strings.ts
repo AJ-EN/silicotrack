@@ -162,6 +162,53 @@ export const STRINGS = {
   },
   'result.savedSynced': { hi: 'रिकॉर्ड भेज दिया गया।', en: 'Record sent.' },
 
+  // --- Camp planning ---
+  'camp.title': { hi: 'शिविर की सूची', en: 'Camp call list' },
+  'camp.subtitle': {
+    hi: 'जोखिम के अनुसार प्राथमिकता, गाँव के अनुसार समूहित',
+    en: 'Prioritised by exposure, clustered by village',
+  },
+  'camp.district': { hi: 'ज़िला', en: 'District' },
+  'camp.block': { hi: 'ब्लॉक', en: 'Block' },
+  'camp.allBlocks': { hi: 'सभी ब्लॉक', en: 'All blocks' },
+  'camp.capacity': { hi: 'क्षमता', en: 'Capacity' },
+  'camp.seats': { hi: 'सीटें', en: 'seats' },
+  'camp.clustering': { hi: 'गाँव के अनुसार समूहन', en: 'Village clustering' },
+  'camp.clusterOn': { hi: 'चालू', en: 'On' },
+  'camp.clusterOff': { hi: 'बंद', en: 'Off — pure risk order' },
+  'camp.eligible': { hi: 'पात्र श्रमिक', en: 'Eligible workers' },
+  'camp.excluded': { hi: 'प्रमाणित — बाहर रखे गए', en: 'Certified — excluded' },
+  'camp.excludedWhy': {
+    hi: 'पहले से प्रमाणित श्रमिकों को शिविर सूची से बाहर रखा जाता है। उनकी सीट किसी अनदेखे व्यक्ति को मिलनी चाहिए।',
+    en: 'Already-certified workers are excluded. Their seat belongs to someone still undetected.',
+  },
+  'camp.villagesToVisit': { hi: 'गाँव जाने हैं', en: 'Villages to visit' },
+  'camp.onList': { hi: 'सूची में', en: 'On list' },
+  'camp.ofEligible': { hi: 'में से', en: 'of' },
+
+  // --- The targeting argument ---
+  'camp.enrichment': { hi: 'लक्ष्यीकरण का असर', en: 'Effect of targeting' },
+  'camp.selectedMean': { hi: 'इस सूची का औसत जोखिम', en: 'This list, mean exposure' },
+  'camp.poolMean': { hi: 'बिना चुने औसत जोखिम', en: 'Unselected, mean exposure' },
+  'camp.ratio': { hi: 'गुना अधिक जोखिम', en: 'times the exposure' },
+  'camp.highTierShare': { hi: 'श्रेणी 3+ का हिस्सा', en: 'Share at tier 3+' },
+  'camp.notCases': {
+    hi: 'यह जोखिम की तुलना है, रोगियों की संख्या का अनुमान नहीं। यह प्रणाली रोग की संभावना नहीं बताती।',
+    en: 'This compares EXPOSURE, not cases found. The system does not estimate probability of disease.',
+  },
+
+  // --- Call list ---
+  'camp.rank': { hi: 'क्रम', en: '#' },
+  'camp.worker': { hi: 'श्रमिक', en: 'Worker' },
+  'camp.village': { hi: 'गाँव', en: 'Village' },
+  'camp.exposure': { hi: 'संचयी जोखिम', en: 'Cumulative exposure' },
+  'camp.age': { hi: 'उम्र', en: 'Age' },
+  'camp.emptyList': {
+    hi: 'इस ब्लॉक में कोई पात्र श्रमिक नहीं मिला।',
+    en: 'No eligible workers found in this block.',
+  },
+  'camp.incompleteFlag': { hi: 'साक्षात्कार अधूरा', en: 'Interview incomplete' },
+
   // --- Escalation reasons ---
   'esc.PRIOR_TB': { hi: 'पहले टीबी हुई थी', en: 'Prior TB' },
   'esc.LATENCY': {
