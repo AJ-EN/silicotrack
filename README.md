@@ -4,7 +4,9 @@
 
 Submitted to the iStart Rajasthan Innovation Challenge — *Early Detection & Screening Tech for Occupational Lung Disease (Silicosis)*.
 
-> **Status: unvalidated prototype.** Runs on synthetic data. Not clinically validated, not deployed, not a medical device. It does not diagnose. See [Honest status](#honest-status).
+**Live demo: [silicotrack.vercel.app](https://silicotrack.vercel.app)**
+
+> **Status: unvalidated prototype.** Runs on synthetic data. Not clinically validated, not a medical device. It does not diagnose. Everything visible in the live demo is generated — no real worker, quarry, camp or board decision is represented. See [Honest status](#honest-status).
 
 ---
 
