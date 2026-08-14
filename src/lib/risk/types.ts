@@ -145,9 +145,21 @@ export interface RiskResult {
   insufficientData: boolean;
 }
 
+/**
+ * Replacement task intensities, in mg/m³, for a single scoring run.
+ *
+ * Exists for the JEM admin screen: a domain expert proposes different
+ * coefficients and sees the cohort re-tier immediately. Nothing is persisted
+ * and the committed matrix is not mutated, so the same call without overrides
+ * still returns the committed answer.
+ */
+export type IntensityOverrides = Readonly<Partial<Record<JemTaskCode, number>>>;
+
 export interface RiskEngineInput {
   segments: readonly ExposureSegmentInput[];
   worker: WorkerRiskFacts;
+  /** Sensitivity analysis only. Omit for the committed matrix. */
+  intensityOverrides?: IntensityOverrides;
   /**
    * ISO date string, e.g. `'2026-08-13'`.
    *

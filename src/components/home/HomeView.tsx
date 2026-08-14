@@ -57,6 +57,22 @@ export function HomeView() {
         </ul>
       </section>
 
+      {/* --- The model-review screen. Separate from the four operational
+              roles: it is not a field job, it is the answer to the project's
+              largest technical weakness. --- */}
+      <section className="mt-8">
+        <h2 className="text-lg font-bold">{t('home.adminTitle')}</h2>
+        <p className="mt-2 text-base leading-relaxed">{t('home.adminBlurb')}</p>
+        <Link
+          href="/admin/jem"
+          className="tap mt-3 flex flex-col justify-center rounded-md border-2 px-4 py-3"
+          style={{ borderColor: 'var(--field-rule)' }}
+        >
+          <span className="text-base font-bold">{t('jem.title')}</span>
+          <span className="text-sm text-muted-foreground">{t('role.admin')}</span>
+        </Link>
+      </section>
+
       {/* --- The argument, in three sourced sentences. --- */}
       <section className="mt-8">
         <h2 className="text-lg font-bold">{t('home.thesisTitle')}</h2>

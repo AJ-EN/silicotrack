@@ -368,6 +368,63 @@ describe('control modifiers', () => {
   });
 });
 
+describe('intensity overrides — the JEM admin sandbox', () => {
+  const twelveYears = () => [
+    segment({ taskCode: 'DRILL_DRY', startYear: 2015, endYear: REF_YEAR }),
+  ];
+
+  it('scores with the proposed coefficient instead of the committed one', () => {
+    const committed = assessRisk(input(twelveYears()));
+    const doubled = assessRisk({
+      ...input(twelveYears()),
+      intensityOverrides: { DRILL_DRY: JEM.DRILL_DRY.intensityMgM3 * 2 },
+    });
+
+    expect(committed.cumulativeExposure).toBe(3.36);
+    expect(doubled.cumulativeExposure).toBe(6.72);
+    expect(doubled.tier).toBeGreaterThan(committed.tier);
+  });
+
+  it('leaves the committed matrix untouched', () => {
+    // The whole point: an expert can explore against a live cohort without
+    // mutating the model anyone else is being scored by.
+    const before = JEM.DRILL_DRY.intensityMgM3;
+    assessRisk({ ...input(twelveYears()), intensityOverrides: { DRILL_DRY: 99 } });
+    expect(JEM.DRILL_DRY.intensityMgM3).toBe(before);
+    expect(assessRisk(input(twelveYears())).cumulativeExposure).toBe(3.36);
+  });
+
+  it('applies control modifiers on top of the override, not instead of them', () => {
+    const result = assessRisk({
+      ...input([
+        segment({
+          taskCode: 'DRESS',
+          startYear: REF_YEAR,
+          endYear: REF_YEAR,
+          method: 'wet',
+        }),
+      ]),
+      intensityOverrides: { DRESS: 1.0 },
+    });
+    // 1.0 × m_method(wet) = 0.5 for one full-time year.
+    expect(result.cumulativeExposure).toBe(CONTROL_MODIFIERS.method.wet);
+  });
+
+  it('ignores an override for a task the worker never did', () => {
+    const result = assessRisk({
+      ...input(twelveYears()),
+      intensityOverrides: { POLISH: 5 },
+    });
+    expect(result.cumulativeExposure).toBe(3.36);
+  });
+
+  it('treats an empty override map as the committed matrix', () => {
+    expect(assessRisk({ ...input(twelveYears()), intensityOverrides: {} })).toEqual(
+      assessRisk(input(twelveYears())),
+    );
+  });
+});
+
 describe('escalation rules in isolation', () => {
   /** Ten years of loading: Tier 1, TSFE 9 so latency does not fire. */
   const shortLowExposure = () => [

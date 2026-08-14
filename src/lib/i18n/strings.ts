@@ -366,6 +366,60 @@ export const STRINGS = {
   'dash.portalFunnel': { hi: 'पोर्टल चरण', en: 'Portal stages' },
   'dash.of': { hi: 'में से', en: 'of' },
 
+  // --- JEM admin ---
+  'jem.title': { hi: 'जोखिम गुणांक — समीक्षा', en: 'Exposure coefficients — review' },
+  'jem.subtitle': {
+    hi: 'मान बदलें और पूरे समूह पर प्रभाव तुरंत देखें। कुछ भी सहेजा नहीं जाता।',
+    en: 'Change a value and see the effect on the whole cohort immediately. Nothing is saved.',
+  },
+  'jem.sandboxNotice': {
+    hi: 'यह केवल संवेदनशीलता विश्लेषण है। यहाँ किए बदलाव सहेजे नहीं जाते और किसी श्रमिक की श्रेणी नहीं बदलते। प्रस्तावित मान निर्यात करें और समीक्षा के बाद ही मॉडल में शामिल करें।',
+    en: 'Sensitivity analysis only. Changes here are not saved and do not alter any worker\'s tier. Export a proposal and let it go through review before it enters the model.',
+  },
+  'jem.task': { hi: 'कार्य', en: 'Task' },
+  'jem.committed': { hi: 'वर्तमान मान', en: 'Committed' },
+  'jem.proposed': { hi: 'प्रस्तावित मान', en: 'Proposed' },
+  'jem.range': { hi: 'प्रकाशित परिसर', en: 'Published range' },
+  'jem.confidence': { hi: 'विश्वसनीयता', en: 'Confidence' },
+  'jem.source': { hi: 'स्रोत', en: 'Source' },
+  'jem.reset': { hi: 'सब रीसेट करें', en: 'Reset all' },
+  'jem.export': { hi: 'प्रस्ताव निर्यात करें', en: 'Export proposal' },
+  'jem.copied': { hi: 'कॉपी हो गया', en: 'Copied' },
+  'jem.changed': { hi: 'बदले गए गुणांक', en: 'Coefficients changed' },
+  'jem.outOfRange': {
+    hi: 'प्रकाशित परिसर से बाहर',
+    en: 'outside the published range',
+  },
+
+  // Anchor constraint
+  'jem.anchor': { hi: 'लंगर जाँच', en: 'Anchor check' },
+  'jem.anchorExplain': {
+    hi: 'खदान कार्य-मिश्रण पर भारित औसत मापे गए भारतीय बलुआ पत्थर मान के निकट रहना चाहिए। मैट्रिक्स इस एक मापे गए आँकड़े को विभाजित करता है, नया जोखिम स्तर नहीं गढ़ता।',
+    en: 'The weighted mean across the mine task mix must stay near the one measured Indian sandstone value. The matrix disaggregates that measurement; it does not invent an exposure level.',
+  },
+  'jem.anchorMean': { hi: 'भारित औसत', en: 'Weighted mean' },
+  'jem.anchorTarget': { hi: 'लक्ष्य', en: 'Target' },
+  'jem.anchorOk': { hi: 'लंगर के भीतर', en: 'Within anchor' },
+  'jem.anchorBreached': { hi: 'लंगर टूटा', en: 'Anchor breached' },
+
+  // Cohort effect
+  'jem.cohortEffect': { hi: 'समूह पर प्रभाव', en: 'Effect on the cohort' },
+  'jem.tierNow': { hi: 'वर्तमान', en: 'Committed' },
+  'jem.tierProposed': { hi: 'प्रस्तावित', en: 'Proposed' },
+  'jem.movedUp': { hi: 'श्रेणी बढ़ी', en: 'moved up a tier' },
+  'jem.movedDown': { hi: 'श्रेणी घटी', en: 'moved down a tier' },
+  'jem.unchanged': { hi: 'कोई बदलाव नहीं', en: 'No worker changes tier' },
+  'jem.workers': { hi: 'श्रमिक', en: 'workers' },
+
+  // Landing page entry
+  'home.adminTitle': { hi: 'मॉडल समीक्षा', en: 'Model review' },
+  'home.adminBlurb': {
+    hi: 'जोखिम गुणांक अनंतिम हैं। यह स्क्रीन उन्हें निरीक्षण योग्य बनाती है — मान बदलें और पूरे समूह पर असर देखें।',
+    en: 'The exposure coefficients are provisional. This screen makes them inspectable — change one and watch the whole cohort re-tier.',
+  },
+  'role.admin': { hi: 'व्यावसायिक स्वच्छता विशेषज्ञ', en: 'Occupational hygienist' },
+  'nav.admin': { hi: 'गुणांक', en: 'Coefficients' },
+
   // --- Escalation reasons ---
   'esc.PRIOR_TB': { hi: 'पहले टीबी हुई थी', en: 'Prior TB' },
   'esc.LATENCY': {

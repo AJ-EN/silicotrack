@@ -31,6 +31,7 @@ import {
 import { buildReason } from './explain';
 import type {
   EscalationCode,
+  IntensityOverrides,
   EscalationReason,
   ExposureSegmentInput,
   RiskEngineInput,
@@ -214,6 +215,7 @@ interface ResolvedSegment {
 function resolveSegment(
   segment: ExposureSegmentInput,
   referenceYear: number,
+  intensityOverrides: IntensityOverrides,
 ): ResolvedSegment | null {
   if (!Number.isFinite(segment.startYear)) return null;
   if (segment.startYear > referenceYear) return null;
@@ -224,8 +226,13 @@ function resolveSegment(
   if (endYear < segment.startYear) return null;
 
   const taskCode = resolveTaskCode(segment.taskCode);
-  const intensity =
-    getJemEntry(taskCode).intensityMgM3 * controlModifier(segment, taskCode);
+  // An override replaces the matrix value for this run only. Nothing is
+  // mutated — the same engine call with no overrides still returns the
+  // committed answer, which is what makes sensitivity analysis safe to run
+  // against a live cohort.
+  const baseIntensity =
+    intensityOverrides[taskCode] ?? getJemEntry(taskCode).intensityMgM3;
+  const intensity = baseIntensity * controlModifier(segment, taskCode);
 
   return {
     taskCode,
@@ -324,8 +331,10 @@ function satisfiedEscalations(
 export function assessRisk(input: RiskEngineInput): RiskResult {
   const referenceYear = referenceYearOf(input.referenceDate);
 
+  const intensityOverrides = input.intensityOverrides ?? {};
+
   const resolved = input.segments
-    .map((segment) => resolveSegment(segment, referenceYear))
+    .map((segment) => resolveSegment(segment, referenceYear, intensityOverrides))
     .filter((segment): segment is ResolvedSegment => segment !== null);
 
   resolveDurations(resolved);
