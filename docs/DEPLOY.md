@@ -145,13 +145,18 @@ Remember to delete the smoke-test worker afterwards, or re-run the seed.
 ephemeral and not shared between function invocations, so writes vanish and
 `*.db` is gitignored anyway. This is why the project moved to Postgres.
 
-**Pooled connections dislike big writes.** The seed inserts in batches of 100
-for this reason. A single `createMany` of 500 rows is one large statement in
+**Pooled connections dislike big writes.** The seed inserts in batches of 25
+and retries a batch that fails on a dropped connection. A single `createMany` of 500 rows is one large statement in
 one transaction, which is exactly what a transaction-mode pooler — Prisma
 Postgres, Supabase, PgBouncer — is least willing to hold open. It fails as
 `Client has encountered a connection error and is not queryable`, which names
-neither the size nor the pooler. The seed now prints each table as it lands, so
-a failure tells you where it stopped.
+neither the size nor the pooler.
+
+Row count was never the constraint — payload size was. Batching by 100 got the
+thin tables in and still failed on RiskAssessment, whose rows carry two JSON
+blobs and two reason strings, one of them Devanagari at three bytes per
+character. The seed prints each table as it lands, so a failure says where it
+stopped.
 
 **Connection limits.** Serverless functions open a pool per instance. The
 client is cached on `globalThis` in development, but a busy deployment on a

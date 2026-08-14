@@ -852,18 +852,47 @@ function report(workers: GeneratedWorker[], plan: Plan): void {
 /**
  * Rows per INSERT.
  *
- * A single `createMany` of 500 workers becomes one very large statement inside
- * one transaction. That is fine against a local Postgres and fails against a
- * POOLED connection — Prisma Postgres, Supabase and PgBouncer-style poolers all
- * run in transaction mode, where a long-running transaction is exactly the
- * thing they are least willing to hold open. The failure surfaces as
- * "Client has encountered a connection error and is not queryable", which
- * names neither the size nor the pooler.
+ * Deliberately small. A pooled connection — Prisma Postgres, Supabase,
+ * PgBouncer — runs in transaction mode and is least willing to hold open a big
+ * statement in a long transaction. Batching by 500 failed outright; batching by
+ * 100 got the thin tables in and still died on RiskAssessment, whose rows carry
+ * two JSON blobs and two reason strings, one of them Devanagari at three bytes
+ * per character. Row count was never the constraint — payload size was.
  *
- * 100 keeps every statement small and every transaction short, at a cost of a
- * few extra round trips on a script that runs once.
+ * 25 keeps every statement small regardless of how fat the row is. The script
+ * runs once, so the extra round trips cost nothing worth counting.
  */
-const WRITE_BATCH_SIZE = 100;
+const WRITE_BATCH_SIZE = 25;
+
+const RETRY_ATTEMPTS = 4;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Retry a write that failed on a dropped connection.
+ *
+ * A pooler may close a connection between statements for reasons that have
+ * nothing to do with this script. The adapter holds a pool, so the next attempt
+ * gets a fresh connection.
+ *
+ * Safe to retry because every `createMany` here passes `skipDuplicates` and
+ * every row has an explicit deterministic id: if a batch actually committed
+ * before the connection dropped, replaying it inserts nothing.
+ */
+async function withRetry<T>(label: string, run: () => Promise<T>): Promise<T> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await run();
+    } catch (error) {
+      if (attempt >= RETRY_ATTEMPTS) throw error;
+      const backoff = 400 * 2 ** (attempt - 1);
+      console.log(`  ${label}: attempt ${attempt} failed, retrying in ${backoff}ms`);
+      await sleep(backoff);
+    }
+  }
+}
 
 /** Insert `rows` in batches, so no single statement can outgrow the pooler. */
 async function createInBatches<T>(
@@ -872,7 +901,8 @@ async function createInBatches<T>(
   insert: (batch: T[]) => Promise<unknown>,
 ): Promise<void> {
   for (let start = 0; start < rows.length; start += WRITE_BATCH_SIZE) {
-    await insert(rows.slice(start, start + WRITE_BATCH_SIZE));
+    const batch = rows.slice(start, start + WRITE_BATCH_SIZE);
+    await withRetry(label, () => insert(batch));
   }
   if (rows.length > 0) console.log(`  wrote ${rows.length} ${label}`);
 }
@@ -904,7 +934,7 @@ async function write(workers: GeneratedWorker[], plan: Plan): Promise<void> {
         clinicalStatus: w.clinicalStatus,
         createdBy: w.createdBy,
         createdAt: w.createdAt,
-      })), (batch) => prisma.worker.createMany({ data: batch }));
+      })), (batch) => prisma.worker.createMany({ data: batch, skipDuplicates: true }));
 
     await createInBatches('exposure segments', workers.flatMap((w, workerIndex) =>
         w.segments.map((segment, segmentIndex) => ({
@@ -922,7 +952,7 @@ async function write(workers: GeneratedWorker[], plan: Plan): Promise<void> {
           hoursPerDay: segment.hoursPerDay,
           siteName: segment.siteName,
         })),
-      ), (batch) => prisma.exposureSegment.createMany({ data: batch }));
+      ), (batch) => prisma.exposureSegment.createMany({ data: batch, skipDuplicates: true }));
 
     await createInBatches('risk assessments', workers.map((w, index) => ({
         id: `RA-${String(index + 1).padStart(5, '0')}`,
@@ -943,17 +973,17 @@ async function write(workers: GeneratedWorker[], plan: Plan): Promise<void> {
         confidence: w.result.confidence,
         computedAt: `${REFERENCE_DATE}T06:00:00Z`,
         isCurrent: true,
-      })), (batch) => prisma.riskAssessment.createMany({ data: batch }));
+      })), (batch) => prisma.riskAssessment.createMany({ data: batch, skipDuplicates: true }));
 
-    await createInBatches('camps', plan.camps, (b) => prisma.camp.createMany({ data: b }));
+    await createInBatches('camps', plan.camps, (b) => prisma.camp.createMany({ data: b, skipDuplicates: true }));
     await createInBatches('camp invitations', plan.invites, (b) =>
-      prisma.campInvite.createMany({ data: b }));
+      prisma.campInvite.createMany({ data: b, skipDuplicates: true }));
     await createInBatches('screening events', plan.screenings, (b) =>
-      prisma.screeningEvent.createMany({ data: b }));
+      prisma.screeningEvent.createMany({ data: b, skipDuplicates: true }));
     await createInBatches('referrals', plan.referrals, (b) =>
-      prisma.referral.createMany({ data: b }));
+      prisma.referral.createMany({ data: b, skipDuplicates: true }));
     await createInBatches('stage transitions', plan.stageEvents, (b) =>
-      prisma.referralStageEvent.createMany({ data: b }));
+      prisma.referralStageEvent.createMany({ data: b, skipDuplicates: true }));
   } finally {
     await prisma.$disconnect();
   }
