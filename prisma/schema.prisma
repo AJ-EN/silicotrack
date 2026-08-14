@@ -1,18 +1,20 @@
 // SilicoTrack data model — CLAUDE.md §5.
 //
-// Prototype runs on SQLite. The production path is Postgres on the Rajasthan
-// State Data Centre, so everything here stays portable:
+// Postgres everywhere: `prisma dev` locally, hosted Prisma Postgres in
+// deployment. The production path is Postgres on the Rajasthan State Data
+// Centre, and the schema was kept portable from the start so that move is a
+// provider change and nothing else:
 //
-//   * NO Prisma enums.        SQLite does not support them. Enum-like columns
-//                             are String, with the permitted values documented
-//                             on the field and enforced by Zod at every
-//                             boundary (CLAUDE.md §9).
-//   * NO scalar lists.        SQLite does not support them. The `[]` fields in
-//                             the brief become either a relation table (where
-//                             the list is queryable and drives a feature) or a
-//                             JSON string (where it is an opaque snapshot).
-//   * NO native-type or       Nothing here needs rewriting to move to Postgres
-//     SQLite-only defaults.   beyond changing the datasource provider.
+//   * NO Prisma enums.        Enum-like columns are String, with the permitted
+//                             values documented on the field and enforced by
+//                             Zod at every boundary (CLAUDE.md §9).
+//   * NO scalar lists.        The `[]` fields in the brief become either a
+//                             relation table (where the list is queryable and
+//                             drives a feature) or a JSON string (where it is
+//                             an opaque snapshot).
+//   * NO native-type or       This schema started on SQLite and moved to
+//     engine-only defaults.   Postgres by changing one line. The seed produced
+//                             byte-identical cohort numbers on both.
 //
 // DATES ARE ISO 8601 STRINGS, NOT DateTime (CLAUDE.md §9).
 //
@@ -36,7 +38,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 /// A person in the exposure registry.

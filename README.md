@@ -68,15 +68,34 @@ Tracks every worker across the eight stages the state portal already models inte
 
 ## Quickstart
 
+Postgres everywhere — the same engine locally and deployed, so a query that
+works on your machine works on the deployed app.
+
 ```bash
 git clone <repo> && cd silicotrack
 npm install
 cp .env.example .env
-npx prisma migrate dev --name init
-npm run seed          # ~500 synthetic workers across 4 districts
-npm run dev           # http://localhost:3000
-npm test              # risk engine test suite
+
+npx prisma dev --detach   # local Postgres; prints a connection string
+# paste that string into .env as DATABASE_URL
+
+npx prisma migrate deploy
+npm run seed              # ~500 synthetic workers across 4 districts
+npm run dev               # http://localhost:3000
 ```
+
+Tests:
+
+```bash
+npm run db:test:setup     # one-off: isolated schema, prints TEST_DATABASE_URL
+npm test                  # 215 tests
+```
+
+`npm run db:test:setup` exists because the database tests truncate every table
+between cases. They run against a dedicated `silicotrack_test` schema and
+refuse to start against `public`, so `npm test` can never destroy your seeded
+cohort. Without `TEST_DATABASE_URL` set, the 9 database tests skip and the
+other 206 still run.
 
 **Demo routes** — role switcher in the header, no auth:
 

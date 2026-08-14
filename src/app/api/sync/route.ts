@@ -58,8 +58,8 @@ export async function POST(request: Request): Promise<NextResponse> {
   const accepted: string[] = [];
   const rejected: Rejection[] = [];
 
-  // Sequential, not parallel: SQLite serialises writes anyway, and one bad
-  // submission must not roll back its neighbours.
+  // Sequential, not parallel: one bad submission must not roll back its
+  // neighbours, and a field device syncs a handful of records, not thousands.
   for (const submission of parsed.data.submissions) {
     try {
       await ingestSubmission(prisma, submission);
