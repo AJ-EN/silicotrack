@@ -276,7 +276,18 @@ export function CampView({
                     <td className="px-2 py-3 tabular-nums font-bold">{worker.rank}</td>
                     <td className="px-2 py-3">
                       <span className="font-semibold">{worker.name}</span>
-                      <span className="block text-sm tabular-nums text-muted-foreground">
+                      {/*
+                        Truncated, with the full value on hover and for screen
+                        readers. Seeded IDs are short (SYN-00336) but a worker
+                        registered in the field gets a UUID — 38 characters,
+                        which wrapped onto a second line and made its row 27%
+                        taller than its neighbours, breaking the scan down the
+                        list that this column exists to support.
+                      */}
+                      <span
+                        className="block max-w-[16ch] truncate text-sm tabular-nums text-muted-foreground"
+                        title={worker.workerId}
+                      >
                         {worker.workerId}
                       </span>
                       {worker.insufficientData && (
