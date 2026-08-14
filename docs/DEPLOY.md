@@ -14,25 +14,40 @@ worker.
 
 ## 1. Provision a Postgres database
 
-Any hosted Postgres works. Prisma Postgres is the least friction here because
-the project is already on Prisma 7:
+> **Do not run `prisma init --db` here.** `init` bootstraps a NEW project: it
+> creates `prisma/schema.prisma`, `prisma.config.ts` and `.env`, and edits
+> `.gitignore`. This project already has all four, and the schema is 487 lines
+> of documented, migrated model. Provision the database on its own instead.
+
+**Option A — Prisma Console (recommended for a submission).**
+
+Go to [console.prisma.io](https://console.prisma.io), create a project and a
+Prisma Postgres database, then copy its connection string. Permanent from the
+moment it is created, which is what you want for anything you are going to
+show people.
+
+**Option B — one command, but claim it.**
 
 ```bash
-npx prisma init --db
+npx create-db@latest --region ap-southeast-1
 ```
 
-That logs you into the Prisma Data Platform, creates a database, and writes the
-connection string to `.env`.
+Provisions an instance and prints a connection string plus a **claim URL**.
+Singapore is the nearest region to Rajasthan.
 
-For Prisma Client with the `pg` driver adapter, use the **direct TCP**
-connection string, not the `prisma+postgres://` one:
+**Databases from `create-db` are temporary and auto-delete after roughly 24
+hours unless you open the claim URL.** An unclaimed database will disappear the
+night before a demo, so claim it immediately or use Option A.
+
+Either way, take the **direct TCP** connection string, not the
+`prisma+postgres://` one — the `pg` driver adapter needs TCP:
 
 ```
 postgres://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require
 ```
 
-Neon, Supabase, Vercel Postgres and a plain managed Postgres are all equally
-fine. Nothing in the application knows which one it is talking to.
+Neon, Supabase, Vercel Postgres and a plain managed Postgres all work
+identically. Nothing in the application knows which one it is talking to.
 
 ## 2. Apply the schema
 
