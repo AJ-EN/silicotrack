@@ -74,8 +74,16 @@ Set one environment variable in the Vercel project settings:
 Do **not** set `TEST_DATABASE_URL` in production. It exists only so `npm test`
 has an isolated schema to truncate.
 
-`npm run build` runs `prisma generate` through the normal Next.js build, so no
-extra build command is needed.
+No custom build command is needed. `prisma generate` runs from the
+`postinstall` script, which matters because `src/generated/prisma` is
+gitignored — without it a fresh clone builds against a Prisma client that does
+not exist and fails with `Module not found: Can't resolve
+'../../generated/prisma/client'`. Verified by deleting the generated directory
+and building from clean.
+
+Neither `prisma generate` nor `next build` needs a reachable database, so the
+build succeeds even before `DATABASE_URL` is set. It is only needed at
+runtime.
 
 ---
 
