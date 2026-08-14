@@ -849,6 +849,34 @@ function report(workers: GeneratedWorker[], plan: Plan): void {
 // Write
 // ---------------------------------------------------------------------------
 
+/**
+ * Rows per INSERT.
+ *
+ * A single `createMany` of 500 workers becomes one very large statement inside
+ * one transaction. That is fine against a local Postgres and fails against a
+ * POOLED connection — Prisma Postgres, Supabase and PgBouncer-style poolers all
+ * run in transaction mode, where a long-running transaction is exactly the
+ * thing they are least willing to hold open. The failure surfaces as
+ * "Client has encountered a connection error and is not queryable", which
+ * names neither the size nor the pooler.
+ *
+ * 100 keeps every statement small and every transaction short, at a cost of a
+ * few extra round trips on a script that runs once.
+ */
+const WRITE_BATCH_SIZE = 100;
+
+/** Insert `rows` in batches, so no single statement can outgrow the pooler. */
+async function createInBatches<T>(
+  label: string,
+  rows: readonly T[],
+  insert: (batch: T[]) => Promise<unknown>,
+): Promise<void> {
+  for (let start = 0; start < rows.length; start += WRITE_BATCH_SIZE) {
+    await insert(rows.slice(start, start + WRITE_BATCH_SIZE));
+  }
+  if (rows.length > 0) console.log(`  wrote ${rows.length} ${label}`);
+}
+
 async function write(workers: GeneratedWorker[], plan: Plan): Promise<void> {
   try {
     // Order matters: children before parents. Cascades would handle most of
@@ -862,8 +890,7 @@ async function write(workers: GeneratedWorker[], plan: Plan): Promise<void> {
     await prisma.exposureSegment.deleteMany();
     await prisma.worker.deleteMany();
 
-    await prisma.worker.createMany({
-      data: workers.map((w) => ({
+    await createInBatches('workers', workers.map((w) => ({
         workerId: w.workerId,
         name: w.name,
         age: w.age,
@@ -877,11 +904,9 @@ async function write(workers: GeneratedWorker[], plan: Plan): Promise<void> {
         clinicalStatus: w.clinicalStatus,
         createdBy: w.createdBy,
         createdAt: w.createdAt,
-      })),
-    });
+      })), (batch) => prisma.worker.createMany({ data: batch }));
 
-    await prisma.exposureSegment.createMany({
-      data: workers.flatMap((w, workerIndex) =>
+    await createInBatches('exposure segments', workers.flatMap((w, workerIndex) =>
         w.segments.map((segment, segmentIndex) => ({
           id: `SEG-${String(workerIndex + 1).padStart(5, '0')}-${segmentIndex + 1}`,
           workerId: w.workerId,
@@ -897,11 +922,9 @@ async function write(workers: GeneratedWorker[], plan: Plan): Promise<void> {
           hoursPerDay: segment.hoursPerDay,
           siteName: segment.siteName,
         })),
-      ),
-    });
+      ), (batch) => prisma.exposureSegment.createMany({ data: batch }));
 
-    await prisma.riskAssessment.createMany({
-      data: workers.map((w, index) => ({
+    await createInBatches('risk assessments', workers.map((w, index) => ({
         id: `RA-${String(index + 1).padStart(5, '0')}`,
         workerId: w.workerId,
         cumulativeExposure: w.result.cumulativeExposure,
@@ -920,14 +943,17 @@ async function write(workers: GeneratedWorker[], plan: Plan): Promise<void> {
         confidence: w.result.confidence,
         computedAt: `${REFERENCE_DATE}T06:00:00Z`,
         isCurrent: true,
-      })),
-    });
+      })), (batch) => prisma.riskAssessment.createMany({ data: batch }));
 
-    await prisma.camp.createMany({ data: plan.camps });
-    await prisma.campInvite.createMany({ data: plan.invites });
-    await prisma.screeningEvent.createMany({ data: plan.screenings });
-    await prisma.referral.createMany({ data: plan.referrals });
-    await prisma.referralStageEvent.createMany({ data: plan.stageEvents });
+    await createInBatches('camps', plan.camps, (b) => prisma.camp.createMany({ data: b }));
+    await createInBatches('camp invitations', plan.invites, (b) =>
+      prisma.campInvite.createMany({ data: b }));
+    await createInBatches('screening events', plan.screenings, (b) =>
+      prisma.screeningEvent.createMany({ data: b }));
+    await createInBatches('referrals', plan.referrals, (b) =>
+      prisma.referral.createMany({ data: b }));
+    await createInBatches('stage transitions', plan.stageEvents, (b) =>
+      prisma.referralStageEvent.createMany({ data: b }));
   } finally {
     await prisma.$disconnect();
   }
