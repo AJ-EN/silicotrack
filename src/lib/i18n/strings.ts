@@ -37,6 +37,54 @@ export const STRINGS = {
   'nav.dashboard': { hi: 'डैशबोर्ड', en: 'Dashboard' },
   'lang.toggle': { hi: 'English', en: 'हिन्दी' },
 
+  // --- Roles behind each screen. The demo has no auth (CLAUDE.md §10); this
+  // switcher stands in for one, and naming the role is the point of it.
+  'role.field': { hi: 'आशा / एएनएम / सीएचओ', en: 'ASHA / ANM / CHO' },
+  'role.camp': { hi: 'जिला टीबी अधिकारी', en: 'District TB Officer' },
+  'role.referral': { hi: 'डीपीबी समन्वयक', en: 'DPB coordinator' },
+  'role.dashboard': { hi: 'डीएसएपी / डीओआईटी&सी', en: 'DSAP / DoIT&C' },
+
+  // --- Landing page ---
+  'home.lede': {
+    hi: 'सिलिकोसिस की जाँच किसे पहले मिले, यह तय करने के लिए जोखिम-आधारित प्रणाली — राजस्थान के बलुआ पत्थर क्षेत्र के लिए।',
+    en: 'An exposure-based system for deciding who gets screened for silicosis first, built for Rajasthan\'s sandstone belt.',
+  },
+  'home.thesisTitle': { hi: 'समस्या', en: 'The problem' },
+  'home.thesis1': {
+    hi: '21,871 आवेदनों में से 11,288 (57.6%) CHC स्तर पर इसलिए अस्वीकृत हुए कि कोई लक्षण नहीं थे — जबकि शुरुआती सिलिकोसिस में लक्षण होते ही नहीं।',
+    en: '11,288 of 21,871 applications (57.6%) were rejected at CHC level for having no symptoms — in a disease that is asymptomatic in exactly the stage worth catching.',
+  },
+  'home.thesis2': {
+    hi: 'छाती का एक्स-रे शुरुआती सिलिकोसिस के लिए HRCT की तुलना में केवल ~48% संवेदनशील है। यह भौतिकी की सीमा है; कोई सॉफ़्टवेयर इसे नहीं बदल सकता।',
+    en: 'Chest X-ray is only ~48% sensitive for early silicosis against HRCT. That is photon physics; no software changes it.',
+  },
+  'home.thesis3': {
+    hi: 'जब जाँच की सटीकता तय है, तो बचा हुआ एकमात्र लीवर यह है कि जाँच किसकी हो। संचयी सिलिका जोखिम ही वह एकमात्र भविष्यवक्ता है जो रोग बनने से पहले उपलब्ध है।',
+    en: 'When test accuracy is fixed, the only remaining lever is who gets tested. Cumulative silica exposure is the only predictor available before pathology exists.',
+  },
+  'home.screensTitle': { hi: 'चार स्क्रीन', en: 'Four screens' },
+  'home.open': { hi: 'खोलें', en: 'Open' },
+  'home.statusTitle': { hi: 'ईमानदार स्थिति', en: 'Honest status' },
+  'home.statusValidation': {
+    hi: 'कोई नैदानिक सत्यापन नहीं। किसी वास्तविक रोगी की जाँच नहीं हुई।',
+    en: 'No clinical validation. No real patient has been screened.',
+  },
+  'home.statusData': {
+    hi: 'सारा डेटा कृत्रिम है — 500 उत्पन्न श्रमिक, ऐसा ही चिह्नित।',
+    en: 'All data is synthetic — 500 generated workers, labelled as such.',
+  },
+  'home.statusJem': {
+    hi: 'जोखिम गुणांक अनंतिम हैं। राजस्थान बलुआ पत्थर के लिए प्रमाणित JEM प्रकाशित रूप में मौजूद नहीं है।',
+    en: 'Exposure coefficients are provisional. A validated Rajasthan sandstone JEM does not exist in published form.',
+  },
+  'home.statusNotDevice': {
+    hi: 'यह चिकित्सा उपकरण नहीं है और निदान नहीं करता।',
+    en: 'This is not a medical device and does not diagnose.',
+  },
+  'home.docs': { hi: 'दस्तावेज़', en: 'Documentation' },
+  'home.docsModel': { hi: 'जोखिम मॉडल विनिर्देश', en: 'Risk model specification' },
+  'home.docsJem': { hi: 'JEM स्रोत एवं प्रामाणिकता', en: 'JEM sources and provenance' },
+
   // --- Connectivity ---
   'net.online': { hi: 'ऑनलाइन', en: 'Online' },
   'net.offline': { hi: 'ऑफ़लाइन', en: 'Offline' },
