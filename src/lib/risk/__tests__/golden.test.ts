@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { assessRisk } from '../engine';
+import { ESCALATION_MAX_STEPS, assessRisk } from '../engine';
 import { GOLDEN_PROFILES, GOLDEN_REFERENCE_DATE } from './golden-profiles';
 import golden from './golden.json';
 import type { RiskResult, Tier } from '../types';
@@ -70,7 +70,9 @@ describe('golden file exercises the whole model', () => {
   it('includes a worker where the escalation step cap binds', () => {
     const capped = results.find((r) => r.escalations.some((e) => !e.applied));
     expect(capped).toBeDefined();
-    expect(capped?.escalations.filter((e) => e.applied)).toHaveLength(2);
+    expect(capped?.escalations.filter((e) => e.applied)).toHaveLength(
+      ESCALATION_MAX_STEPS,
+    );
   });
 
   it('includes an incomplete interview', () => {
@@ -112,7 +114,7 @@ describe('golden file exercises the whole model', () => {
   it('stamps a provisional confidence and both versions on every profile', () => {
     for (const result of results) {
       expect(result.confidence).toBe('provisional');
-      expect(result.modelVersion).toBe('risk-model-0.1.0');
+      expect(result.modelVersion).toBe('risk-model-1.0.0');
       expect(result.jemVersion).toBe('jem-raj-sandstone-0.1.0');
     }
   });

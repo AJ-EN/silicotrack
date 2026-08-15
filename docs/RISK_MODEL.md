@@ -1,8 +1,8 @@
 # RISK_MODEL.md — SilicoTrack Cumulative Exposure Model
 
-**Model version:** `risk-model-0.1.0`
+**Model version:** `risk-model-1.0.0`
 **Status:** Provisional. Unvalidated. No clinical validation has been performed.
-**Last reviewed:** 2026-08-13
+**Last reviewed:** 2026-08-15
 
 ---
 
@@ -256,40 +256,35 @@ It is included because it is the only external reality check currently available
 
 Escalations exist because cumulative dose is not the only determinant of who should be screened first. Each rule below is graded for evidential strength, because they are **not equally well supported and should not be presented as though they were.**
 
-### 7.1 Unresolved specification question — additive or single bump?
+### 7.1 Exposure-gated, single-step escalation
 
-The project brief says "bump one tier, cap at 4" while also listing four rules and requiring tests for escalations "in isolation and in combination." These are in tension: if only one bump is ever applied, combination testing and the tier-4 cap are both near-trivial.
-
-**Specified behaviour `[CAL]` — requires sign-off:**
+**Specified behaviour `[CAL]`:**
 
 ```
-tier = min( 4, baseTier + min( 2, count of satisfied escalation rules ) )
+if CE < 1.0:
+   tier = baseTier
+   escalations = []
+else:
+   tier = min(4, baseTier + min(1, count of satisfied escalation rules))
 ```
 
-Escalations are **additive, capped at +2 tiers, and hard-capped at tier 4. The model never de-escalates.**
+Escalations are evaluated only when `CE >= 1.0 mg/m³·years` `[CAL]`, the lower boundary of the first exposure-priority band. Below that gate, prior TB, latency, and current smoking neither raise the tier nor appear as fired escalation reasons. At or above the gate, all satisfied rules are recorded in evidence-precedence order, but at most one raises the tier. The result remains hard-capped at Tier 4 and never de-escalates.
 
-The +2 sub-cap is the substantive choice. Without it, a worker with `CE = 0.3` who is a current smoker with prior TB and 20 years since first exposure jumps from Tier 1 to Tier 4 — **and the system stops being an exposure gate.** The +2 cap keeps cumulative exposure the dominant term while letting genuine modifiers move a worker meaningfully. A Tier 1 worker can reach Tier 3 on non-exposure grounds but cannot reach Priority.
+**Rationale `[CAL]`: escalations modify an exposure signal; they do not substitute for one.** Smoking or prior TB alone must not create exposure-based screening priority for a worker whose reconstructed silica dose remains below the model's lowest exposure band. The one-step cap preserves the same principle after the gate: multiple non-exposure grounds can strengthen the case for screening, but cannot move a worker through multiple exposure tiers.
 
-> **This is a decision the project owner should confirm before the golden-file tests are frozen.** It materially changes the cohort tier distribution and therefore every camp list the system produces.
+When more than one rule is satisfied, precedence is `PRIOR_TB`, then `LATENCY`, then `CURRENT_SMOKER`, following the evidence grading in §7.2. Lower-precedence reasons remain visible with `applied: false`, so the audit trail preserves relevant context without granting extra tier steps.
 
 #### Measured effect on the 500-worker synthetic cohort
 
-Printed by `npm run seed -- --dry-run`. `fired` = condition held; `applied` = claimed one of the limited escalation steps; `sole` = the only rule firing for that worker, which is the closest available read on a rule's marginal effect.
+Printed by `npm run seed -- --dry-run`. `fired` = condition held after the `CE >= 1.0` gate; `applied` = claimed the single escalation step; `sole` = the only rule firing for that worker.
 
 | Rule | fired | applied | sole trigger |
 |---|---|---|---|
-| `PRIOR_TB` | 45 (9.0%) | 45 (9.0%) | 13 (2.6%) |
-| `PEAK_INTENSITY` | **0 (0.0%)** | 0 (0.0%) | 0 (0.0%) |
-| `LATENCY` | **267 (53.4%)** | 267 (53.4%) | **187 (37.4%)** |
-| `CURRENT_SMOKER` | 117 (23.4%) | 112 (22.4%) | 56 (11.2%) |
+| `PRIOR_TB` | 24 (4.8%) | 24 (4.8%) | 20 (4.0%) |
+| `LATENCY` | 22 (4.4%) | 22 (4.4%) | 18 (3.6%) |
+| `CURRENT_SMOKER` | 47 (9.4%) | 39 (7.8%) | 39 (7.8%) |
 
-Three things follow, and they sharpen the §7.1 decision rather than settling it.
-
-**`LATENCY` is the escalation model.** It fires for over half the cohort and is the sole trigger for 37.4% — more than the other three rules combined. Any argument about escalation policy is, in practice, an argument about this one rule. It is also the rule with the weakest threshold justification (§7.2: 15 years is a tenure floor observed in one cross-sectional study, not a dose-response inflection).
-
-**`PEAK_INTENSITY` fires for nobody**, confirming on a realistic cohort what §7.2 establishes arithmetically: the threshold sits above the matrix ceiling. It is not a weak rule, it is an absent one.
-
-**The +2 cap is nearly irrelevant; the second step is not.** Only 5 workers (1.0%) fire three rules and hit the cap. But 79 (15.8%) fire exactly two and take a full +2. So lowering `ESCALATION_MAX_STEPS` to 1 would not be "tightening an edge case" — it would change the tier of 84 workers, about one in six. The earlier framing of this as a cap question was wrong: it is a question about whether a second escalation should count at all.
+The final tier distribution is Tier 1: 314 (62.8%), Tier 2: 51 (10.2%), Tier 3: 84 (16.8%), and Tier 4: 51 (10.2%). Seventy-five workers (15.0%) are raised above their exposure-only base tier. Eight workers (1.6%) satisfy two rules; precedence selects one applied step and records the other as not applied.
 
 ### 7.2 The rules
 
@@ -336,7 +331,7 @@ The 15-year threshold is set at the observed floor of tenure among silicotic Raj
 >
 > What tenure does not capture, and what this rule now isolates, is that **silicosis progresses after exposure stops.** For a worker still in the quarry, `CE` keeps rising and already tracks them — the model needs no help. For a worker who left, `CE` is frozen at whatever it reached while the disease is not. That worker is the one whose exposure figure understates their risk, and they are now the only population this rule covers.
 >
-> **Measured effect on the 500-worker cohort:** hit rate fell from **267 (53.4%)** to **61 (12.2%)**, and sole-trigger from 187 (37.4%) to 41 (8.2%). Tier 4 fell from 19.0% to 11.2%. The rule stopped being the escalation model and became one signal among three.
+> **Historical effect in `risk-model-0.1.0`, before the §7.1 exposure gate:** hit rate fell from **267 (53.4%)** to **61 (12.2%)**, and sole-trigger from 187 (37.4%) to 41 (8.2%). Tier 4 fell from 19.0% to 11.2%. Current cohort effects are reported in §7.1.
 >
 > **Open question — which clock?** The rule's justification is post-cessation progression, but its threshold still reads `TSFE` (time since exposure BEGAN). A worker who started 16 years ago and stopped last month fires it, having had one month of post-cessation progression. `yearsSinceLastExposure` is computed and returned on every result specifically so this can be reconsidered as a one-line change. Not changed unilaterally: switching clocks would move the rule off the Rajavel tenure evidence that currently supports the 15-year figure, and onto ground with no cited threshold at all.
 
@@ -516,7 +511,7 @@ Stated in the order a hostile technical reviewer would raise them.
 5. **The CXR sensitivity figure comes from the wrong population.** Hoy et al. studied **artificial stone benchtop workers** — engineered quartz, silica content far above natural sandstone, a young cohort with rapidly progressive disease. The 48% sensitivity figure is used here to justify not relying on radiography as a *selector*. It should not be presented as the sensitivity that would be observed in Rajasthan sandstone miners, and the README should carry this caveat too.
 6. **Rescreen intervals are wholly unsourced** (§8).
 7. **The overlap rule has no external justification** (§3.2) and materially affects multi-task workers, who are common.
-8. **Escalation arithmetic is unconfirmed** (§7.1).
+8. **Escalation arithmetic is a calibration choice, not a validated effect modifier** (§7.1). The exposure gate and one-step cap are operational safeguards pending retrospective validation.
 9. **No competing-risk handling.** Workers in this cohort face high TB mortality and, at 37.3% silicosis prevalence, many are already cases. The model has no notion of a worker who already has silicosis; such a worker scores as high-priority-for-screening when they in fact need treatment and certification. **Registry design should capture known prior silicosis certification and route those workers out of the screening funnel entirely.** This is arguably a gap in the data model, not just the risk model.
 
 ---
@@ -531,7 +526,7 @@ Semantic versioning on model behaviour:
 - **Minor** — JEM coefficient revisions, new tasks, modifier changes. Cohort tier distribution may shift.
 - **Major** — threshold changes, escalation logic changes, equation changes.
 
-**Golden-file test:** 20 fixed synthetic worker profiles with committed expected outputs, covering each tier boundary from both sides, every escalation rule in isolation, the +2 escalation cap, the tier-4 hard cap, zero and single segment workers, overlapping segments, ongoing segments, and the `hoursPerDay` clamp.
+**Golden-file test:** 20 fixed synthetic worker profiles with committed expected outputs, covering each tier boundary from both sides, every escalation rule in isolation, the single-step escalation cap, the tier-4 hard cap, zero and single segment workers, overlapping segments, ongoing segments, and the `hoursPerDay` clamp.
 
 Any diff to the golden file must be **deliberate, reviewed, and explained in the commit message.** An unexplained golden-file change is a defect, not a test update.
 

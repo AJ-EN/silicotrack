@@ -152,9 +152,10 @@ describe('zero-segment worker', () => {
     expect(result.reasonHi).toContain('साक्षात्कार अधूरा');
   });
 
-  it('still applies escalations that do not depend on exposure', () => {
+  it('does not substitute non-exposure escalation grounds for an exposure signal', () => {
     const withTb = assessRisk(input([], { smokingStatus: 'never', priorTB: true }));
-    expect(withTb.tier).toBe(2);
+    expect(withTb.tier).toBe(1);
+    expect(withTb.escalations).toEqual([]);
     expect(withTb.insufficientData).toBe(true);
   });
 });
@@ -426,35 +427,33 @@ describe('intensity overrides — the JEM admin sandbox', () => {
 });
 
 describe('escalation rules in isolation', () => {
-  /** Ten years of loading: Tier 1, TSFE 9 so latency does not fire. */
-  const shortLowExposure = () => [
-    segment({ taskCode: 'LOAD', startYear: REF_YEAR - 9, endYear: REF_YEAR }),
-  ];
+  /** Twenty years of loading: CE 1.00, Tier 2, with no latency trigger. */
+  const eligibleExposure = () => [loadYears(20)];
 
   it('does not escalate a clean worker', () => {
-    const result = assessRisk(input(shortLowExposure()));
-    expect(result.baseTier).toBe(1);
-    expect(result.tier).toBe(1);
+    const result = assessRisk(input(eligibleExposure()));
+    expect(result.baseTier).toBe(2);
+    expect(result.tier).toBe(2);
     expect(result.escalations).toEqual([]);
   });
 
   it('escalates for prior TB', () => {
     const worker: WorkerRiskFacts = { smokingStatus: 'never', priorTB: true };
-    const result = assessRisk(input(shortLowExposure(), worker));
+    const result = assessRisk(input(eligibleExposure(), worker));
     expect(result.tier).toBe(result.baseTier + 1);
     expect(result.escalations).toEqual([{ code: 'PRIOR_TB', applied: true }]);
   });
 
   it('escalates for current smoking', () => {
     const worker: WorkerRiskFacts = { smokingStatus: 'current', priorTB: false };
-    const result = assessRisk(input(shortLowExposure(), worker));
+    const result = assessRisk(input(eligibleExposure(), worker));
     expect(result.escalations).toEqual([{ code: 'CURRENT_SMOKER', applied: true }]);
-    expect(result.tier).toBe(2);
+    expect(result.tier).toBe(3);
   });
 
   it('does not escalate former smokers', () => {
     const worker: WorkerRiskFacts = { smokingStatus: 'former', priorTB: false };
-    expect(assessRisk(input(shortLowExposure(), worker)).escalations).toEqual([]);
+    expect(assessRisk(input(eligibleExposure(), worker)).escalations).toEqual([]);
   });
 
   it('escalates at 15 years since first exposure, not 14 — once exposure has ended', () => {
@@ -462,7 +461,7 @@ describe('escalation rules in isolation', () => {
       assessRisk(
         input([
           segment({
-            taskCode: 'LOAD',
+            taskCode: 'DRILL_DRY',
             startYear: REF_YEAR - yearsAgo,
             endYear: REF_YEAR - 1,
           }),
@@ -522,7 +521,7 @@ describe('escalation rules in isolation', () => {
     // Silicosis progresses after exposure stops. A worker who left in 2005 is
     // not thereby low-risk.
     const departed = assessRisk(
-      input([segment({ taskCode: 'LOAD', startYear: 1995, endYear: 2005 })]),
+      input([segment({ taskCode: 'DRILL_DRY', startYear: 1995, endYear: 2005 })]),
     );
     expect(departed.yearsSinceFirstExposure).toBe(REF_YEAR - 1995);
     expect(departed.escalations).toEqual([{ code: 'LATENCY', applied: true }]);
@@ -586,23 +585,33 @@ describe('escalations in combination', () => {
     expect(result.tier).toBe(Math.min(4, result.baseTier + ESCALATION_MAX_STEPS));
   });
 
-  it('drops the weakest-evidence rule first when the cap binds', () => {
-    // Current smoking has the thinnest literature support of the four, so it
-    // is last in precedence and the first to lose its step.
+  it('applies only the strongest-evidence rule when the cap binds', () => {
     const result = assessRisk(
       input([segment({ taskCode: 'LOAD', startYear: 1996, endYear: 2015 })], allThree),
     );
     const dropped = result.escalations.filter((e) => !e.applied).map((e) => e.code);
-    expect(dropped).toEqual(['CURRENT_SMOKER']);
+    expect(dropped).toEqual(['LATENCY', 'CURRENT_SMOKER']);
   });
 
-  it('keeps cumulative exposure dominant: Tier 1 cannot reach Priority', () => {
+  it('does not escalate below CE 1.0 even when prior TB and smoking are present', () => {
     const result = assessRisk(
-      input([segment({ taskCode: 'HAUL', startYear: 1996, endYear: REF_YEAR })], allThree),
+      input([loadYears(19)], allThree),
     );
+    expect(result.cumulativeExposure).toBe(0.95);
     expect(result.baseTier).toBe(1);
+    expect(result.tier).toBe(1);
+    expect(result.escalations).toEqual([]);
+  });
+
+  it('allows one escalation step at exactly CE 1.0', () => {
+    const result = assessRisk(input([loadYears(20)], allThree));
+    expect(result.cumulativeExposure).toBe(1);
+    expect(result.baseTier).toBe(2);
     expect(result.tier).toBe(3);
-    expect(result.tier).toBeLessThan(4);
+    expect(result.escalations).toEqual([
+      { code: 'PRIOR_TB', applied: true },
+      { code: 'CURRENT_SMOKER', applied: false },
+    ]);
   });
 });
 
@@ -648,11 +657,11 @@ describe('rescreen interval follows the final tier', () => {
 
   it('uses the escalated tier, not the base tier', () => {
     const result = assessRisk(
-      input([loadYears(10)], { smokingStatus: 'never', priorTB: true }),
+      input([loadYears(20)], { smokingStatus: 'never', priorTB: true }),
     );
-    expect(result.baseTier).toBe(1);
-    expect(result.tier).toBe(2);
-    expect(result.rescreenMonths).toBe(36);
+    expect(result.baseTier).toBe(2);
+    expect(result.tier).toBe(3);
+    expect(result.rescreenMonths).toBe(24);
   });
 });
 

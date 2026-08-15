@@ -26,12 +26,17 @@
 import 'dotenv/config';
 
 import { prisma } from '../src/lib/db/client';
-import { ESCALATION_PRECEDENCE, assessRisk } from '../src/lib/risk/engine';
+import {
+  ESCALATION_MAX_STEPS,
+  ESCALATION_PRECEDENCE,
+  assessRisk,
+} from '../src/lib/risk/engine';
 import {
   CLINICAL_STATUSES,
   isCampEligible,
   type ClinicalStatus,
 } from '../src/lib/camp/eligibility';
+import { planCamp, type CampCandidate } from '../src/lib/camp/planner';
 import { PIPELINE_STAGES, TERMINAL_STAGES, isStalled } from '../src/lib/referral/stages';
 import type {
   ExposureSegmentInput,
@@ -727,24 +732,6 @@ function report(workers: GeneratedWorker[], plan: Plan): void {
     console.log(`  Tier ${tier}${String(count).padStart(6)}  ${pct(count)}`);
   }
 
-  // Counterfactual for the unresolved ESCALATION_MAX_STEPS decision
-  // (RISK_MODEL.md §7.1). The cohort is the evidence for that call, so the
-  // seed reports it rather than leaving it to be discovered later.
-  const singleBump = [1, 2, 3, 4].map(
-    (tier) =>
-      workers.filter(
-        (w) => Math.min(4, w.result.baseTier + Math.min(w.result.escalations.length, 1)) === tier,
-      ).length,
-  );
-  console.log('\nCounterfactual — if ESCALATION_MAX_STEPS were 1 (single bump):');
-  for (const tier of [1, 2, 3, 4]) {
-    const count = singleBump[tier - 1] ?? 0;
-    const actual = tierCounts[tier - 1] ?? 0;
-    const delta = count - actual;
-    const arrow = delta === 0 ? '' : delta > 0 ? ` (+${delta})` : ` (${delta})`;
-    console.log(`  Tier ${tier}${String(count).padStart(6)}  ${pct(count)}${arrow}`);
-  }
-
   // --- Per-rule hit rates -------------------------------------------------
   // Which rule is actually doing the work. `fired` is how often the condition
   // held; `applied` is how often it claimed one of the limited escalation
@@ -778,12 +765,13 @@ function report(workers: GeneratedWorker[], plan: Plan): void {
     );
   }
 
-  // How often the +2 step cap actually binds.
+  // How often the escalation step cap actually binds.
   console.log('\nRules firing per worker:');
   for (let count = 0; count <= ESCALATION_PRECEDENCE.length; count++) {
     const n = workers.filter((w) => w.result.escalations.length === count).length;
     if (n === 0) continue;
-    const capped = count > 2 ? '  ← capped, weakest rule dropped' : '';
+    const capped =
+      count > ESCALATION_MAX_STEPS ? '  ← capped, lower-precedence rules dropped' : '';
     console.log(`  ${count} rule(s) ${String(n).padStart(4)}  ${pct(n)}${capped}`);
   }
 
@@ -806,6 +794,30 @@ function report(workers: GeneratedWorker[], plan: Plan): void {
     console.log(
       `  ${district.name.padEnd(9)} ${String(inDistrict.length).padStart(4)} workers   ` +
         `tier 4: ${String(priority).padStart(3)} (${((priority / inDistrict.length) * 100).toFixed(1)}%)`,
+    );
+  }
+
+  const karauliCandidates: CampCandidate[] = workers
+    .filter((worker) => worker.district === 'Karauli')
+    .map((worker) => ({
+      workerId: worker.workerId,
+      name: worker.name,
+      village: worker.village,
+      age: worker.age,
+      tier: worker.result.tier,
+      cumulativeExposure: worker.result.cumulativeExposure,
+      clinicalStatus: worker.clinicalStatus,
+      insufficientData: worker.result.insufficientData,
+    }));
+  const karauliCamp = planCamp(karauliCandidates, 40);
+
+  console.log('\nKarauli camp list — capacity 40, clustered:');
+  console.log(`  ${'rank'.padStart(4)}  ${'worker'.padEnd(13)}  tier    CE  village`);
+  for (const candidate of karauliCamp.selected) {
+    console.log(
+      `  ${String(candidate.rank).padStart(4)}  ${candidate.workerId.padEnd(13)}  ` +
+        `${String(candidate.tier).padStart(4)}  ${candidate.cumulativeExposure.toFixed(2).padStart(5)}  ` +
+        candidate.village,
     );
   }
 

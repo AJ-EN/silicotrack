@@ -40,7 +40,7 @@ import type {
   Tier,
 } from './types';
 
-export const MODEL_VERSION = 'risk-model-0.1.0';
+export const MODEL_VERSION = 'risk-model-1.0.0';
 
 // --- Thresholds -------------------------------------------------------------
 // See RISK_MODEL.md §6. Only the 4.0 boundary is a literature value (Howlett
@@ -97,23 +97,10 @@ const MONTHS_PER_YEAR = 12;
 const MAX_HOURS_PER_DAY = 12;
 
 /**
- * Maximum tiers an escalation can add. RISK_MODEL.md §7.1 — THIS IS THE
- * UNRESOLVED SPECIFICATION DECISION.
- *
- * The brief says "bump one tier, cap at 4" while also requiring tests for
- * escalations "in isolation and in combination", which are in tension.
- *
- * Escalations are additive here, capped at +2. Without the sub-cap a worker
- * with CE = 0.3 who smokes, had TB, and has 20 years since first exposure jumps
- * Tier 1 → Tier 4, and the system stops being an exposure gate. With it,
- * cumulative exposure stays the dominant term: a Tier 1 worker can reach Tier 3
- * on non-exposure grounds but never Priority.
- *
- * Set to 1 for single-bump semantics, or 4 for uncapped. Either change requires
- * regenerating the golden file, which is the point — the effect on the cohort
- * becomes visible rather than silent.
+ * Maximum tiers an escalation can add. Escalations modify an established
+ * exposure signal; they never substitute for one. See RISK_MODEL.md §7.1.
  */
-export const ESCALATION_MAX_STEPS = 2;
+export const ESCALATION_MAX_STEPS = 1;
 
 /**
  * Evaluation order, strongest evidence first (RISK_MODEL.md §7.2). This is the
@@ -414,7 +401,10 @@ export function assessRisk(input: RiskEngineInput): RiskResult {
   // --- Tiering ---
   const baseTier = tierForExposure(cumulativeExposure);
 
-  const fired = satisfiedEscalations(input, yearsSinceFirstExposure, exposureEnded);
+  const fired =
+    cumulativeExposure >= TIER_2_THRESHOLD
+      ? satisfiedEscalations(input, yearsSinceFirstExposure, exposureEnded)
+      : [];
   const appliedSteps = Math.min(fired.length, ESCALATION_MAX_STEPS);
   const escalations: EscalationReason[] = fired.map((code, index) => ({
     code,
