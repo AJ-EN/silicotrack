@@ -2,6 +2,7 @@
 
 import { useLocale } from '@/components/field/locale';
 import { Disclaimers } from '@/components/field/result';
+import { SyntheticDataNotice } from '@/components/ui/data-notice';
 import type { Surveillance } from '@/lib/dashboard/surveillance';
 import type { Funnel } from '@/lib/referral/funnel';
 import type { StringKey } from '@/lib/i18n';
@@ -62,6 +63,7 @@ export function DashboardView({ surveillance, funnel }: DashboardViewProps) {
     <div className="mx-auto w-full max-w-4xl px-4 py-6">
       <h1 className="text-2xl font-bold">{t('dash.title')}</h1>
       <p className="mt-1 text-base text-muted-foreground">{t('dash.subtitle')}</p>
+      <SyntheticDataNotice />
 
       <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="dash.registered" value={String(cohort.registered)} />

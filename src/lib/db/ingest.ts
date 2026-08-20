@@ -77,7 +77,9 @@ export async function ingestSubmission(
     // The submission is the complete ledger for this worker, so stored
     // segments are replaced wholesale. Merging would leave orphaned rows from
     // an earlier draft of the same interview.
-    await tx.exposureSegment.deleteMany({ where: { workerId: submission.workerId } });
+    await tx.exposureSegment.deleteMany({
+      where: { workerId: submission.workerId },
+    });
     await tx.exposureSegment.createMany({
       data: submission.segments.map((segment, index) => ({
         id: `${submission.workerId}-SEG-${index + 1}`,
@@ -92,6 +94,8 @@ export async function ingestSubmission(
         endYear: segment.endYear,
         monthsPerYear: segment.monthsPerYear,
         hoursPerDay: segment.hoursPerDay,
+        durationCertainty: segment.durationCertainty ?? 'not_sure',
+        frequencyPattern: segment.frequencyPattern ?? 'not_sure',
         siteName: segment.siteName,
       })),
     });

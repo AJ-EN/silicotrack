@@ -135,7 +135,13 @@ export function RiskResultPanel({ result }: { result: RiskResult }) {
 
       {/* Explainability. This is the part that earns trust. */}
       <h3 className="mt-6 text-lg font-bold">{t('result.why')}</h3>
-      <p className="mt-2 text-lg leading-[1.7]">
+      <p
+        className="mt-2 rounded-md border-2 p-4 text-lg font-semibold leading-[1.7]"
+        style={{
+          borderColor: 'var(--field-rule)',
+          backgroundColor: 'var(--field-notice)',
+        }}
+      >
         {locale === 'hi' ? result.reasonHi : result.reasonEn}
       </p>
 

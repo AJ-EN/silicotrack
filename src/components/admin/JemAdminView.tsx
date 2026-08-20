@@ -143,6 +143,16 @@ export function JemAdminView({ cohort, referenceDate }: JemAdminViewProps) {
       <h1 className="text-2xl font-bold">{t('jem.title')}</h1>
       <p className="mt-1 text-base text-muted-foreground">{t('jem.subtitle')}</p>
 
+      <p
+        className="mt-4 rounded-md border-2 p-4 text-base font-semibold"
+        style={{
+          borderColor: 'var(--field-rule)',
+          backgroundColor: 'var(--field-notice)',
+        }}
+      >
+        {t('jem.validationNotice')}
+      </p>
+
       {/* The guard-rail, stated before anything is editable. */}
       <p
         className="mt-4 rounded-md border-2 p-4 text-base"

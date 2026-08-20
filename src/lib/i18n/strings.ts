@@ -36,6 +36,14 @@ export const STRINGS = {
   'nav.referral': { hi: 'रेफरल', en: 'Referrals' },
   'nav.dashboard': { hi: 'डैशबोर्ड', en: 'Dashboard' },
   'lang.toggle': { hi: 'English', en: 'हिन्दी' },
+  'lang.marwariPlanned': {
+    hi: 'मारवाड़ी (शीघ्र आ रहा है)',
+    en: 'Marwari extension planned',
+  },
+  'data.syntheticNotice': {
+    hi: 'कृत्रिम विकास डेटा — केवल प्रणाली प्रदर्शन के लिए',
+    en: 'SYNTHETIC DEVELOPMENT DATA — FOR SYSTEM DEMONSTRATION ONLY',
+  },
 
   // --- Roles behind each screen. The demo has no auth (CLAUDE.md §10); this
   // switcher stands in for one, and naming the role is the point of it.
@@ -47,7 +55,7 @@ export const STRINGS = {
   // --- Landing page ---
   'home.lede': {
     hi: 'सिलिकोसिस की जाँच किसे पहले मिले, यह तय करने के लिए जोखिम-आधारित प्रणाली — राजस्थान के बलुआ पत्थर क्षेत्र के लिए।',
-    en: 'An exposure-based system for deciding who gets screened for silicosis first, built for Rajasthan\'s sandstone belt.',
+    en: "An exposure-based system for deciding who gets screened for silicosis first, built for Rajasthan's sandstone belt.",
   },
   'home.thesisTitle': { hi: 'समस्या', en: 'The problem' },
   'home.thesis1': {
@@ -82,8 +90,14 @@ export const STRINGS = {
     en: 'This is not a medical device and does not diagnose.',
   },
   'home.docs': { hi: 'दस्तावेज़', en: 'Documentation' },
-  'home.docsModel': { hi: 'जोखिम मॉडल विनिर्देश', en: 'Risk model specification' },
-  'home.docsJem': { hi: 'JEM स्रोत एवं प्रामाणिकता', en: 'JEM sources and provenance' },
+  'home.docsModel': {
+    hi: 'जोखिम मॉडल विनिर्देश',
+    en: 'Risk model specification',
+  },
+  'home.docsJem': {
+    hi: 'JEM स्रोत एवं प्रामाणिकता',
+    en: 'JEM sources and provenance',
+  },
 
   // --- Connectivity ---
   'net.online': { hi: 'ऑनलाइन', en: 'Online' },
@@ -124,6 +138,14 @@ export const STRINGS = {
   'worker.village': { hi: 'गाँव', en: 'Village' },
   'worker.phone': { hi: 'मोबाइल नंबर', en: 'Mobile number' },
   'worker.phoneOptional': { hi: 'वैकल्पिक', en: 'optional' },
+  'worker.tokenLabel': {
+    hi: 'अस्थायी कार्यकर्ता टोकन / पंजीकरण संख्या',
+    en: 'Temporary Worker Token / Registration ID',
+  },
+  'worker.tokenHint': {
+    hi: 'रिकॉर्ड सहेजते समय प्रणाली एक अस्थायी टोकन अपने आप बनाएगी। सरकारी पहचान संख्या दर्ज न करें।',
+    en: 'A temporary token will be issued automatically when the record is saved. Do not enter a government identity number.',
+  },
   'worker.noAadhaar': {
     hi: 'आधार नंबर न पूछें और न दर्ज करें।',
     en: 'Do not ask for or record an Aadhaar number.',
@@ -151,8 +173,8 @@ export const STRINGS = {
   // --- Field: exposure segments ---
   'segment.title': { hi: 'काम का इतिहास', en: 'Work history' },
   'segment.intro': {
-    hi: 'हर उस काम को जोड़ें जो इस व्यक्ति ने किया है। सबसे पुराना पहले।',
-    en: 'Add every job this person has done. Oldest first.',
+    hi: 'हर काम अलग जोड़ें — काम एक ही समय पर हुआ हो या एक के बाद एक। सबसे पुराना पहले।',
+    en: 'Add every job separately, whether jobs overlapped or followed one another. Oldest first.',
   },
   'segment.add': { hi: 'काम जोड़ें', en: 'Add job' },
   'segment.remove': { hi: 'हटाएँ', en: 'Remove' },
@@ -187,6 +209,21 @@ export const STRINGS = {
   'segment.hoursPerDay': { hi: 'दिन में कितने घंटे', en: 'Hours per day' },
   'segment.months': { hi: 'महीने', en: 'months' },
   'segment.hours': { hi: 'घंटे', en: 'hours' },
+  'segment.durationCertainty': {
+    hi: 'काम की अवधि कितनी पक्की है?',
+    en: 'How certain is the duration?',
+  },
+  'segment.duration.exact': { hi: 'पक्की', en: 'Exact' },
+  'segment.duration.approximate': { hi: 'लगभग', en: 'Approximate' },
+  'segment.duration.notSure': { hi: 'अनिश्चित', en: 'Not sure' },
+  'segment.frequencyPattern': { hi: 'काम की आवृत्ति', en: 'Work frequency' },
+  'segment.frequency.regular': { hi: 'नियमित', en: 'Regular' },
+  'segment.frequency.seasonal': {
+    hi: 'मौसमी / प्रवासी',
+    en: 'Seasonal / Migrant',
+  },
+  'segment.frequency.approximate': { hi: 'लगभग', en: 'Approximate' },
+  'segment.frequency.notSure': { hi: 'अनिश्चित', en: 'Not sure' },
   'segment.siteName': { hi: 'खदान का नाम', en: 'Site name' },
   'segment.siteNameUnknown': { hi: 'पता नहीं', en: 'Unknown' },
 
@@ -196,12 +233,18 @@ export const STRINGS = {
   'result.tier2': { hi: 'मध्यम', en: 'Moderate' },
   'result.tier3': { hi: 'उच्च', en: 'High' },
   'result.tier4': { hi: 'प्राथमिकता', en: 'Priority' },
-  'result.cumulative': { hi: 'संचयी सिलिका जोखिम', en: 'Cumulative silica exposure' },
+  'result.cumulative': {
+    hi: 'संचयी सिलिका जोखिम',
+    en: 'Cumulative silica exposure',
+  },
   'result.rescreen': { hi: 'अगली जाँच', en: 'Next screening' },
   'result.months': { hi: 'महीने में', en: 'months' },
   'result.why': { hi: 'यह श्रेणी क्यों?', en: 'Why this tier?' },
   'result.contributors': { hi: 'मुख्य कारण', en: 'Main contributors' },
-  'result.escalations': { hi: 'श्रेणी बढ़ाने के कारण', en: 'Escalation reasons' },
+  'result.escalations': {
+    hi: 'श्रेणी बढ़ाने के कारण',
+    en: 'Escalation reasons',
+  },
   'result.tsfe': { hi: 'पहले जोखिम को हुए', en: 'Years since first exposure' },
   'result.incomplete': { hi: 'साक्षात्कार अधूरा', en: 'Interview incomplete' },
   'result.savedOffline': {
@@ -236,8 +279,14 @@ export const STRINGS = {
 
   // --- The targeting argument ---
   'camp.enrichment': { hi: 'लक्ष्यीकरण का असर', en: 'Effect of targeting' },
-  'camp.selectedMean': { hi: 'इस सूची का औसत जोखिम', en: 'This list, mean exposure' },
-  'camp.poolMean': { hi: 'बिना चुने औसत जोखिम', en: 'Unselected, mean exposure' },
+  'camp.selectedMean': {
+    hi: 'इस सूची का औसत जोखिम',
+    en: 'This list, mean exposure',
+  },
+  'camp.poolMean': {
+    hi: 'बिना चुने औसत जोखिम',
+    en: 'Unselected, mean exposure',
+  },
   'camp.ratio': { hi: 'गुना अधिक जोखिम', en: 'times the exposure' },
   'camp.highTierShare': { hi: 'श्रेणी 3+ का हिस्सा', en: 'Share at tier 3+' },
   'camp.notCases': {
@@ -255,7 +304,10 @@ export const STRINGS = {
     hi: 'इस ब्लॉक में कोई पात्र श्रमिक नहीं मिला।',
     en: 'No eligible workers found in this block.',
   },
-  'camp.incompleteFlag': { hi: 'साक्षात्कार अधूरा', en: 'Interview incomplete' },
+  'camp.incompleteFlag': {
+    hi: 'साक्षात्कार अधूरा',
+    en: 'Interview incomplete',
+  },
 
   // --- Referral tracker ---
   'ref.title': { hi: 'रेफरल ट्रैकर', en: 'Referral tracker' },
@@ -270,7 +322,10 @@ export const STRINGS = {
   'ref.funnel': { hi: 'चरणवार गिरावट', en: 'Stage-by-stage drop-off' },
   'ref.reached': { hi: 'यहाँ तक पहुँचे', en: 'reached' },
   'ref.lostHere': { hi: 'यहाँ से आगे नहीं बढ़े', en: 'did not go further' },
-  'ref.awaitingPayment': { hi: 'प्रमाणित, भुगतान बाकी', en: 'certified, awaiting payment' },
+  'ref.awaitingPayment': {
+    hi: 'प्रमाणित, भुगतान बाकी',
+    en: 'certified, awaiting payment',
+  },
   'ref.awaitingPaymentNote': {
     hi: 'ये श्रमिक मिल चुके हैं — यह पहचान की नहीं, भुगतान की देरी है। इसे गिरावट में नहीं गिना जाता।',
     en: 'These workers were found. This is a payment delay, not a detection failure, and is not counted as drop-off.',
@@ -281,7 +336,10 @@ export const STRINGS = {
   'ref.outcomes': { hi: 'बाहर निकलने के कारण', en: 'Exits from the pipeline' },
   'ref.lostFrom': { hi: 'किस चरण से', en: 'lost from' },
   'ref.stalledList': { hi: 'अटके हुए रेफरल', en: 'Stalled referrals' },
-  'ref.stalledNone': { hi: 'कोई रेफरल अटका नहीं है।', en: 'No referrals are stalled.' },
+  'ref.stalledNone': {
+    hi: 'कोई रेफरल अटका नहीं है।',
+    en: 'No referrals are stalled.',
+  },
   'ref.stalledWhy': {
     hi: 'ये रेफरल एक ही चरण में 14 दिन से अधिक रुके हैं। समाप्त हो चुके रेफरल यहाँ नहीं दिखते।',
     en: 'These have sat in one stage for more than 14 days. Finished referrals are not listed.',
@@ -292,7 +350,7 @@ export const STRINGS = {
   'ref.board': { hi: 'बोर्ड', en: 'Board' },
   'ref.noSymptomsNote': {
     hi: 'लक्षण न होने पर अस्वीकृति राज्य की सबसे बड़ी हानि है — 21,871 आवेदनों में से 11,288 (57.6%)। शुरुआती सिलिकोसिस में लक्षण होते ही नहीं।',
-    en: 'Rejection for absent symptoms is the state\'s largest loss — 11,288 of 21,871 applications (57.6%). Early silicosis has no symptoms at all.',
+    en: "Rejection for absent symptoms is the state's largest loss — 11,288 of 21,871 applications (57.6%). Early silicosis has no symptoms at all.",
   },
 
   // --- Pipeline stage names ---
@@ -325,11 +383,17 @@ export const STRINGS = {
   'dash.incomplete': { hi: 'अधूरे साक्षात्कार', en: 'Incomplete interviews' },
   'dash.invited': { hi: 'आमंत्रित', en: 'Invited' },
   'dash.attended': { hi: 'उपस्थित', en: 'Attended' },
-  'dash.abnormal': { hi: 'रेडियोग्राफ़ में निष्कर्ष', en: 'Radiographic findings' },
+  'dash.abnormal': {
+    hi: 'रेडियोग्राफ़ में निष्कर्ष',
+    en: 'Radiographic findings',
+  },
   'dash.flagged': { hi: 'आगे की समीक्षा के लिए', en: 'Flagged for review' },
   'dash.referred': { hi: 'रेफर किए गए', en: 'Referred' },
   'dash.certifiedCount': { hi: 'प्रमाणित', en: 'Certified' },
-  'dash.tierDistribution': { hi: 'जोखिम श्रेणी वितरण', en: 'Exposure tier distribution' },
+  'dash.tierDistribution': {
+    hi: 'जोखिम श्रेणी वितरण',
+    en: 'Exposure tier distribution',
+  },
   'dash.cascade': { hi: 'पहचान श्रृंखला', en: 'Detection cascade' },
   'dash.byDistrict': { hi: 'ज़िलेवार', en: 'By district' },
   'dash.district': { hi: 'ज़िला', en: 'District' },
@@ -337,7 +401,10 @@ export const STRINGS = {
   'dash.priority': { hi: 'श्रेणी 4', en: 'Tier 4' },
 
   // The headline metric.
-  'dash.symptomGate': { hi: 'लक्षण-आधारित छँटनी का असर', en: 'What the symptom gate costs' },
+  'dash.symptomGate': {
+    hi: 'लक्षण-आधारित छँटनी का असर',
+    en: 'What the symptom gate costs',
+  },
   'dash.abnormalFindings': {
     hi: 'ILO श्रेणी 1+ रेडियोग्राफ़',
     en: 'Radiographs at ILO category 1+',
@@ -367,14 +434,21 @@ export const STRINGS = {
   'dash.of': { hi: 'में से', en: 'of' },
 
   // --- JEM admin ---
-  'jem.title': { hi: 'जोखिम गुणांक — समीक्षा', en: 'Exposure coefficients — review' },
+  'jem.title': {
+    hi: 'जोखिम गुणांक — समीक्षा',
+    en: 'Exposure coefficients — review',
+  },
   'jem.subtitle': {
     hi: 'मान बदलें और पूरे समूह पर प्रभाव तुरंत देखें। कुछ भी सहेजा नहीं जाता।',
     en: 'Change a value and see the effect on the whole cohort immediately. Nothing is saved.',
   },
   'jem.sandboxNotice': {
     hi: 'यह केवल संवेदनशीलता विश्लेषण है। यहाँ किए बदलाव सहेजे नहीं जाते और किसी श्रमिक की श्रेणी नहीं बदलते। प्रस्तावित मान निर्यात करें और समीक्षा के बाद ही मॉडल में शामिल करें।',
-    en: 'Sensitivity analysis only. Changes here are not saved and do not alter any worker\'s tier. Export a proposal and let it go through review before it enters the model.',
+    en: "Sensitivity analysis only. Changes here are not saved and do not alter any worker's tier. Export a proposal and let it go through review before it enters the model.",
+  },
+  'jem.validationNotice': {
+    hi: 'आधार मान प्रकाशित भारतीय बलुआ पत्थर साहित्य (प्रजापति एवं अन्य) के आधार पर 0.12 mg/m³ पर अंशांकित है। कार्य गुणांक अनंतिम अनुमान हैं, जिन्हें पायलट की शुरुआत में स्थानीय धूल नमूनाकरण से अंशांकित किया जाएगा।',
+    en: 'Baseline anchor calibrated at 0.12 mg/m³ based on published Indian sandstone literature (Prajapati et al.). Task coefficients are provisional estimates to be calibrated via local dust sampling during pilot inception.',
   },
   'jem.task': { hi: 'कार्य', en: 'Task' },
   'jem.committed': { hi: 'वर्तमान मान', en: 'Committed' },
@@ -417,7 +491,10 @@ export const STRINGS = {
     hi: 'जोखिम गुणांक अनंतिम हैं। यह स्क्रीन उन्हें निरीक्षण योग्य बनाती है — मान बदलें और पूरे समूह पर असर देखें।',
     en: 'The exposure coefficients are provisional. This screen makes them inspectable — change one and watch the whole cohort re-tier.',
   },
-  'role.admin': { hi: 'व्यावसायिक स्वच्छता विशेषज्ञ', en: 'Occupational hygienist' },
+  'role.admin': {
+    hi: 'व्यावसायिक स्वच्छता विशेषज्ञ',
+    en: 'Occupational hygienist',
+  },
   'nav.admin': { hi: 'गुणांक', en: 'Coefficients' },
 
   // --- Escalation reasons ---
@@ -445,15 +522,27 @@ export const STRINGS = {
   // --- Validation ---
   'error.required': { hi: 'यह ज़रूरी है', en: 'Required' },
   'error.nameShort': { hi: 'नाम बहुत छोटा है', en: 'Name is too short' },
-  'error.ageRange': { hi: 'उम्र 15 से 100 के बीच होनी चाहिए', en: 'Age must be 15–100' },
-  'error.phone': { hi: '10 अंकों का नंबर दर्ज करें', en: 'Enter a 10-digit number' },
+  'error.ageRange': {
+    hi: 'उम्र 15 से 100 के बीच होनी चाहिए',
+    en: 'Age must be 15–100',
+  },
+  'error.phone': {
+    hi: '10 अंकों का नंबर दर्ज करें',
+    en: 'Enter a 10-digit number',
+  },
   'error.yearRange': { hi: 'साल सही नहीं है', en: 'Year is out of range' },
   'error.endBeforeStart': {
     hi: 'आख़िरी साल शुरू के साल से पहले नहीं हो सकता',
     en: 'End year cannot precede start year',
   },
-  'error.startFuture': { hi: 'शुरू का साल भविष्य में नहीं हो सकता', en: 'Start year cannot be in the future' },
-  'error.noSegments': { hi: 'कम से कम एक काम जोड़ें', en: 'Add at least one job' },
+  'error.startFuture': {
+    hi: 'शुरू का साल भविष्य में नहीं हो सकता',
+    en: 'Start year cannot be in the future',
+  },
+  'error.noSegments': {
+    hi: 'कम से कम एक काम जोड़ें',
+    en: 'Add at least one job',
+  },
   'error.saveFailed': { hi: 'सहेजने में दिक्कत हुई', en: 'Could not save' },
 } as const satisfies Record<string, Translation>;
 

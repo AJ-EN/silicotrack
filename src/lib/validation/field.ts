@@ -31,11 +31,16 @@ export const enclosureSchema = z.enum(['open', 'enclosed']);
 export const ppeUseSchema = z.enum(['none', 'intermittent', 'consistent']);
 export const siteTypeSchema = z.enum(['surface', 'underground']);
 export const materialSchema = z.enum(['sandstone', 'quartzite', 'granite', 'other']);
+export const durationCertaintySchema = z.enum(['exact', 'approximate', 'not_sure']);
+export const frequencyPatternSchema = z.enum([
+  'regular',
+  'seasonal_migrant',
+  'approximate',
+  'not_sure',
+]);
 
 /** Task codes come from the JEM itself, so the two can never drift apart. */
-export const taskCodeSchema = z.enum(
-  JEM_TASK_ORDER as unknown as [string, ...string[]],
-);
+export const taskCodeSchema = z.enum(JEM_TASK_ORDER as unknown as [string, ...string[]]);
 
 /**
  * Exposure segment as captured in the interview.
@@ -67,12 +72,14 @@ export function exposureSegmentSchema(referenceYear: number) {
         .nullable(),
       monthsPerYear: z.number().int().min(1).max(12),
       hoursPerDay: z.number().int().min(1).max(16),
+      durationCertainty: durationCertaintySchema.optional(),
+      frequencyPattern: frequencyPatternSchema.optional(),
       siteName: z.string().trim().max(120).nullable(),
     })
-    .refine(
-      (segment) => segment.endYear === null || segment.endYear >= segment.startYear,
-      { message: err('error.endBeforeStart'), path: ['endYear'] },
-    );
+    .refine((segment) => segment.endYear === null || segment.endYear >= segment.startYear, {
+      message: err('error.endBeforeStart'),
+      path: ['endYear'],
+    });
 }
 
 export type ExposureSegmentDraft = z.infer<ReturnType<typeof exposureSegmentSchema>>;

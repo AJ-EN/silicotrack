@@ -2,6 +2,7 @@
 
 import { useLocale } from '@/components/field/locale';
 import { Disclaimers, TierBadge } from '@/components/field/result';
+import { SyntheticDataNotice } from '@/components/ui/data-notice';
 import type { Funnel } from '@/lib/referral/funnel';
 import { STALLED_DAYS } from '@/lib/referral/stages';
 import type { Tier } from '@/lib/risk/types';
@@ -50,6 +51,7 @@ export function ReferralView({ funnel, stalled }: ReferralViewProps) {
     <div className="mx-auto w-full max-w-4xl px-4 py-6">
       <h1 className="text-2xl font-bold">{t('ref.title')}</h1>
       <p className="mt-1 text-base text-muted-foreground">{t('ref.subtitle')}</p>
+      <SyntheticDataNotice />
 
       <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="ref.total" value={String(funnel.total)} />

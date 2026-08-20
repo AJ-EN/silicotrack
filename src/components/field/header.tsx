@@ -39,7 +39,12 @@ export function FieldHeader() {
           <p className="truncate text-xl font-bold text-white">{t('app.name')}</p>
           <p className="truncate text-sm text-white/80">{t('app.tagline')}</p>
         </Link>
-        <LocaleToggle />
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <LocaleToggle />
+          <span className="max-w-44 text-right text-xs font-semibold leading-tight text-white/80">
+            {t('lang.marwariPlanned')}
+          </span>
+        </div>
       </div>
 
       {/*

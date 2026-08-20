@@ -55,7 +55,9 @@ if (hasDatabase && schema === 'public') {
 }
 
 const prisma = hasDatabase
-  ? new PrismaClient({ adapter: new PrismaPg({ connectionString }, { schema }) })
+  ? new PrismaClient({
+      adapter: new PrismaPg({ connectionString }, { schema }),
+    })
   : null;
 
 /** Tables in dependency order; CASCADE handles the rest. */
@@ -108,6 +110,8 @@ function submission(overrides: Partial<FieldSubmission> = {}): FieldSubmission {
         endYear: null,
         monthsPerYear: 12,
         hoursPerDay: 8,
+        durationCertainty: 'approximate',
+        frequencyPattern: 'seasonal_migrant',
         siteName: null,
       },
     ],
@@ -141,8 +145,14 @@ describeDb('first delivery', () => {
 
     expect(await prisma.worker.count()).toBe(1);
     expect(await prisma.exposureSegment.count()).toBe(1);
+    expect(await prisma.exposureSegment.findFirst()).toMatchObject({
+      durationCertainty: 'approximate',
+      frequencyPattern: 'seasonal_migrant',
+    });
 
-    const assessment = await prisma.riskAssessment.findFirst({ where: { isCurrent: true } });
+    const assessment = await prisma.riskAssessment.findFirst({
+      where: { isCurrent: true },
+    });
     // Matches golden profile P03 exactly — the server recomputes rather than
     // trusting the tier the device sent, and must agree with it.
     expect(assessment?.cumulativeExposure).toBe(3.36);
@@ -193,11 +203,17 @@ describeDb('a genuine re-interview supersedes rather than overwrites', () => {
       submission({
         capturedAt: '2026-08-14T10:00:00Z',
         referenceDate: '2026-08-14',
-        worker: { ...submission().worker, smokingStatus: 'current', priorTB: true },
+        worker: {
+          ...submission().worker,
+          smokingStatus: 'current',
+          priorTB: true,
+        },
       }),
     );
 
-    const all = await prisma.riskAssessment.findMany({ orderBy: { computedAt: 'asc' } });
+    const all = await prisma.riskAssessment.findMany({
+      orderBy: { computedAt: 'asc' },
+    });
     expect(all).toHaveLength(2);
     expect(all[0]?.isCurrent).toBe(false);
     expect(all[1]?.isCurrent).toBe(true);
@@ -222,14 +238,18 @@ describeDb('a genuine re-interview supersedes rather than overwrites', () => {
     // which is why the sync payload has no clinicalStatus field at all.
     await ingestSubmission(prisma, submission({ capturedAt: '2026-08-14T10:00:00Z' }));
 
-    const worker = await prisma.worker.findUnique({ where: { workerId: 'W-test-0001' } });
+    const worker = await prisma.worker.findUnique({
+      where: { workerId: 'W-test-0001' },
+    });
     expect(worker?.clinicalStatus).toBe('CERTIFIED');
   });
 
   it('defaults a newly registered worker to UNKNOWN', async () => {
     if (prisma === null) return;
     await ingestSubmission(prisma, submission());
-    const worker = await prisma.worker.findUnique({ where: { workerId: 'W-test-0001' } });
+    const worker = await prisma.worker.findUnique({
+      where: { workerId: 'W-test-0001' },
+    });
     expect(worker?.clinicalStatus).toBe('UNKNOWN');
   });
 
@@ -238,10 +258,15 @@ describeDb('a genuine re-interview supersedes rather than overwrites', () => {
     await ingestSubmission(prisma, submission());
     await ingestSubmission(
       prisma,
-      submission({ capturedAt: '2026-08-14T10:00:00Z', createdBy: 'ASHA-SOMEONE-ELSE' }),
+      submission({
+        capturedAt: '2026-08-14T10:00:00Z',
+        createdBy: 'ASHA-SOMEONE-ELSE',
+      }),
     );
 
-    const worker = await prisma.worker.findUnique({ where: { workerId: 'W-test-0001' } });
+    const worker = await prisma.worker.findUnique({
+      where: { workerId: 'W-test-0001' },
+    });
     expect(worker?.createdBy).toBe('ASHA-DEMO');
     expect(worker?.createdAt).toBe('2026-08-13T09:15:00Z');
   });
@@ -284,7 +309,9 @@ describeDb('an incomplete interview is stored as such', () => {
     if (prisma === null) return;
     await ingestSubmission(prisma, submission({ segments: [] }));
 
-    const assessment = await prisma.riskAssessment.findFirst({ where: { isCurrent: true } });
+    const assessment = await prisma.riskAssessment.findFirst({
+      where: { isCurrent: true },
+    });
     expect(assessment?.insufficientData).toBe(true);
     expect(assessment?.tier).toBe(1);
     expect(assessment?.reasonEn).toContain('Interview incomplete');

@@ -57,11 +57,11 @@ const SMOKING_CHOICES: readonly Choice<SmokingStatus>[] = [
 const MATERIAL_CHOICES: readonly Choice<
   'sandstone' | 'quartzite' | 'granite' | 'other'
 >[] = [
-  { value: 'sandstone', label: 'segment.material.sandstone' },
-  { value: 'quartzite', label: 'segment.material.quartzite' },
-  { value: 'granite', label: 'segment.material.granite' },
-  { value: 'other', label: 'segment.material.other' },
-];
+    { value: 'sandstone', label: 'segment.material.sandstone' },
+    { value: 'quartzite', label: 'segment.material.quartzite' },
+    { value: 'granite', label: 'segment.material.granite' },
+    { value: 'other', label: 'segment.material.other' },
+  ];
 
 const METHOD_CHOICES: readonly Choice<'wet' | 'dry'>[] = [
   { value: 'wet', label: 'segment.method.wet' },
@@ -83,6 +83,23 @@ const SITE_CHOICES: readonly Choice<'surface' | 'underground'>[] = [
   { value: 'surface', label: 'segment.siteType.surface' },
   { value: 'underground', label: 'segment.siteType.underground' },
 ];
+
+const DURATION_CERTAINTY_CHOICES: readonly Choice<
+  'exact' | 'approximate' | 'not_sure'
+>[] = [
+    { value: 'exact', label: 'segment.duration.exact' },
+    { value: 'approximate', label: 'segment.duration.approximate' },
+    { value: 'not_sure', label: 'segment.duration.notSure' },
+  ];
+
+const FREQUENCY_PATTERN_CHOICES: readonly Choice<
+  'regular' | 'seasonal_migrant' | 'approximate' | 'not_sure'
+>[] = [
+    { value: 'regular', label: 'segment.frequency.regular' },
+    { value: 'seasonal_migrant', label: 'segment.frequency.seasonal' },
+    { value: 'approximate', label: 'segment.frequency.approximate' },
+    { value: 'not_sure', label: 'segment.frequency.notSure' },
+  ];
 
 interface IdentityDraft {
   name: string;
@@ -108,6 +125,8 @@ function emptySegment(referenceYear: number): ExposureSegmentDraft {
     endYear: null,
     monthsPerYear: 10,
     hoursPerDay: 8,
+    durationCertainty: 'exact',
+    frequencyPattern: 'regular',
     siteName: null,
   };
 }
@@ -337,6 +356,16 @@ export function FieldInterview({ referenceDate }: { referenceDate: string }) {
                 error={errors['phone']}
                 maxLength={10}
               />
+              <div
+                className="mb-4 rounded-md border-2 p-4"
+                style={{
+                  borderColor: 'var(--field-rule)',
+                  backgroundColor: 'var(--field-notice)',
+                }}
+              >
+                <p className="text-base font-bold">{t('worker.tokenLabel')}</p>
+                <p className="mt-1 text-base leading-[1.6]">{t('worker.tokenHint')}</p>
+              </div>
               {/* Standing instruction, not a validation message. */}
               <p className="mb-6 text-base font-semibold">{t('worker.noAadhaar')}</p>
             </>
@@ -432,6 +461,15 @@ export function FieldInterview({ referenceDate }: { referenceDate: string }) {
                     />
                   )}
 
+                  <ChoiceGroup
+                    label="segment.durationCertainty"
+                    choices={DURATION_CERTAINTY_CHOICES}
+                    value={segment.durationCertainty ?? 'not_sure'}
+                    onChange={(durationCertainty) =>
+                      updateSegment(index, { durationCertainty })
+                    }
+                  />
+
                   <NumberStepper
                     label="segment.monthsPerYear"
                     unit="segment.months"
@@ -439,6 +477,14 @@ export function FieldInterview({ referenceDate }: { referenceDate: string }) {
                     min={1}
                     max={12}
                     onChange={(monthsPerYear) => updateSegment(index, { monthsPerYear })}
+                  />
+                  <ChoiceGroup
+                    label="segment.frequencyPattern"
+                    choices={FREQUENCY_PATTERN_CHOICES}
+                    value={segment.frequencyPattern ?? 'not_sure'}
+                    onChange={(frequencyPattern) =>
+                      updateSegment(index, { frequencyPattern })
+                    }
                   />
                   <NumberStepper
                     label="segment.hoursPerDay"

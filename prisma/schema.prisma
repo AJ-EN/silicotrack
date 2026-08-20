@@ -138,6 +138,12 @@ model ExposureSegment {
   monthsPerYear Int
   hoursPerDay   Int
 
+  /// How confidently the worker recalled start/end years:
+  /// "exact" | "approximate" | "not_sure".
+  durationCertainty String @default("exact")
+  /// "regular" | "seasonal_migrant" | "approximate" | "not_sure".
+  frequencyPattern  String @default("regular")
+
   /// Optional and often unknown: migrant workers frequently cannot name the
   /// quarry, which is itself a documented compensation barrier.
   siteName String?

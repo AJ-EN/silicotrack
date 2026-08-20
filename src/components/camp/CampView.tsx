@@ -4,6 +4,7 @@ import Link from 'next/link';
 
 import { useLocale } from '@/components/field/locale';
 import { Disclaimers, TierBadge } from '@/components/field/result';
+import { SyntheticDataNotice } from '@/components/ui/data-notice';
 import type { CampPlan } from '@/lib/camp/planner';
 import type { StringKey } from '@/lib/i18n';
 
@@ -95,6 +96,7 @@ export function CampView({
     <div className="mx-auto w-full max-w-4xl px-4 py-6">
       <h1 className="text-2xl font-bold">{t('camp.title')}</h1>
       <p className="mt-1 text-base text-muted-foreground">{t('camp.subtitle')}</p>
+      <SyntheticDataNotice />
 
       {/* --- Filters --- */}
       <section className="mt-6 space-y-4">
