@@ -29,7 +29,11 @@ export const STRINGS = {
   },
   'app.unvalidated': {
     hi: 'अप्रमाणित प्रोटोटाइप — कृत्रिम डेटा',
-    en: 'Unvalidated prototype — synthetic data',
+    en: 'Unvalidated prototype — Synthetic data',
+  },
+  'app.pilotReady': {
+    hi: 'पायलट के लिए तैयार प्रोटोटाइप · सरकारी एकीकरण और क्षेत्रीय सत्यापन प्रस्तावित',
+    en: 'Pilot-ready prototype · Government integration and field validation proposed',
   },
   'nav.field': { hi: 'पंजीकरण', en: 'Field registry' },
   'nav.camp': { hi: 'शिविर', en: 'Camps' },
@@ -146,9 +150,13 @@ export const STRINGS = {
     hi: 'रिकॉर्ड सहेजते समय प्रणाली एक अस्थायी टोकन अपने आप बनाएगी। सरकारी पहचान संख्या दर्ज न करें।',
     en: 'A temporary token will be issued automatically when the record is saved. Do not enter a government identity number.',
   },
+  'worker.demoOnly': {
+    hi: 'DEMO ONLY — Do not enter real personal, health, Aadhaar, or government-ID data. All displayed records are synthetic.',
+    en: 'DEMO ONLY — Do not enter real personal, health, Aadhaar, or government-ID data. All displayed records are synthetic.',
+  },
   'worker.noAadhaar': {
     hi: 'आधार नंबर न पूछें और न दर्ज करें।',
-    en: 'Do not ask for or record an Aadhaar number.',
+    en: 'Do not ask for or enter Aadhaar.',
   },
 
   // Districts in the sandstone belt covered by the prototype.

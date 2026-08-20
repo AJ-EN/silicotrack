@@ -301,6 +301,15 @@ export function FieldInterview({ referenceDate }: { referenceDate: string }) {
         <div className="mt-6">
           {step === 0 && (
             <>
+              <p
+                className="mb-5 rounded-md border-2 p-4 text-base font-bold leading-[1.6]"
+                style={{
+                  borderColor: 'var(--field-rule)',
+                  backgroundColor: 'var(--field-notice)',
+                }}
+              >
+                {t('worker.demoOnly')}
+              </p>
               <TextField
                 label="worker.name"
                 placeholder="worker.namePlaceholder"

@@ -77,9 +77,10 @@ export function FieldHeader() {
         </ul>
       </nav>
 
-      <p className="border-t border-white/25 px-4 py-1 text-center text-sm font-semibold text-white/90">
-        {t('app.unvalidated')}
-      </p>
+      <div className="border-t border-white/25 px-4 py-1 text-center text-sm font-semibold text-white/90">
+        <p>{t('app.unvalidated')}</p>
+        <p>{t('app.pilotReady')}</p>
+      </div>
     </header>
   );
 }
